@@ -1,5 +1,5 @@
 import express from 'express';
-import Agent from '../models/Agent.js'; // Import your Mongoose model
+import Agent from '../models/AgentModel.js'; // Import your Mongoose model
 
 const router = express.Router();
 

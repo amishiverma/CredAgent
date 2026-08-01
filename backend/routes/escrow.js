@@ -1,5 +1,5 @@
 import express from 'express';
-import Escrow from '../models/Escrow.js'; // Import your new Mongoose model
+import Escrow from '../models/EscrowModel.js'; // Import your new Mongoose model
 
 const router = express.Router();
 

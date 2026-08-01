@@ -1,5 +1,5 @@
 import express from 'express';
-import Agent from '../models/Agent.js'; // Import your new Mongoose model
+import Agent from '../models/Agent.js'; // Import your Mongoose model
 
 const router = express.Router();
 
@@ -24,7 +24,7 @@ router.get('/:did', async (req, res) => {
   }
 });
 
-// POST /api/agents - Save to MongoDB
+// POST /api/agents - Save to MongoDB permanently
 router.post('/', async (req, res) => {
   const { name, owner, type, reputation = 700, collateral = 500 } = req.body;
 
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
       collateralStaked: Number(collateral)
     });
 
-    res.status(201).json({ status: 'success', message: 'Agent registered', data: newAgent });
+    res.status(201).json({ status: 'success', message: 'Agent registered to MongoDB', data: newAgent });
   } catch (error) {
     res.status(400).json({ status: 'error', message: error.message });
   }

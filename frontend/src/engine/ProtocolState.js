@@ -68,7 +68,7 @@ class ProtocolStateManager {
 
   withdrawCapital(amount) {
     const num = parseFloat(amount);
-    if (isNaN(num) || num <= 0 || num > this.userInvestment) return false;
+    if (isNaN(num) || num <= 0 || num > this.userInvestment || num > this.lenderPool) return false;
     this.lenderPool -= num;
     this.userInvestment -= num;
     this.notify();

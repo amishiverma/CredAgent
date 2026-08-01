@@ -7,9 +7,10 @@ import underwritingRouter from './routes/underwriting.js';
 import escrowRouter from './routes/escrow.js';
 import lenderRouter from './routes/lender.js';
 import simulatorRouter from './routes/simulator.js';
+import connectDB from './config/db.js';
 
 dotenv.config();
-
+connectDB(); 
 const app = express();
 const PORT = process.env.PORT || 5000;
 

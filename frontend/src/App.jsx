@@ -7,10 +7,16 @@ import { UnderwritingEngine } from './components/UnderwritingEngine';
 import { EscrowTracker } from './components/EscrowTracker';
 import { IdentityManager } from './components/IdentityManager';
 import { PitchDeckModal } from './components/PitchDeckModal';
+import { Landing } from './components/Landing';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('simulator');
   const [isPitchOpen, setIsPitchOpen] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
+
+  if (!hasEntered) {
+    return <Landing onEnter={() => { window.scrollTo(0, 0); setHasEntered(true); }} />;
+  }
 
   return (
     <div className="app-root">

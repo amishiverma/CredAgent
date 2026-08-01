@@ -1,12 +1,11 @@
 import mongoose from 'mongoose';
 
-// The "Immutable Ledger" - we only ever APPEND to this array, never modify.
 const transactionSchema = new mongoose.Schema({
-  type: { type: String, required: true }, // e.g., "VENDOR_SPEND", "REVENUE_INTERCEPTED"
+  type: { type: String, required: true }, 
   amount: { type: Number, required: true },
   description: { type: String },
   vendor: { type: String },
-  txHash: { type: String, required: true }, // Simulates blockchain transaction hash
+  txHash: { type: String, required: true },
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -26,8 +25,8 @@ const escrowSchema = new mongoose.Schema({
     enum: ['INITIALIZED', 'ACTIVE', 'REPAID', 'CIRCUIT_BREAKER_FROZEN'],
     default: 'INITIALIZED' 
   },
-  logs: [{ type: String }], // System audit trail
-  transactions: [transactionSchema] // The financial ledger
+  logs: [{ type: String }],
+  transactions: [transactionSchema]
 }, { timestamps: true });
 
 export default mongoose.model('Escrow', escrowSchema);

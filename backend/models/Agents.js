@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const agentSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
-  did: { type: String, required: true, unique: true }, // The cryptographic ID
+  did: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  owner: { type: String, required: true }, // The human wallet address
+  owner: { type: String, required: true },
   type: { type: String, default: 'Autonomous Task Agent' },
   reputation: { type: Number, default: 700 },
   successRate: { type: Number, default: 98.5 },

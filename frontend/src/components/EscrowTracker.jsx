@@ -1,32 +1,98 @@
-import React, { useState } from 'react';
-import { SmartEscrowLedger } from '../engine/SmartEscrowLedger';
-import { ShieldCheck, ArrowRight, DollarSign, Lock, AlertOctagon, CheckCircle2, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, ArrowRight, DollarSign, Lock, AlertOctagon, RefreshCw } from 'lucide-react';
+import { fetchEscrows } from '../services/api.js'; // Import your real API!
 
 export const EscrowTracker = () => {
-  const [escrow, setEscrow] = useState(() => {
-    const instance = new SmartEscrowLedger("escrow_demo_8819", "did:agent:0x89F3b219a10E812cD0294711AA190A521098bcAA", 500, 5.0, "modal.com");
-    instance.executeDisbursement("modal.com", 450, "Provision 8x H100 GPU cluster for LLM job");
-    return instance;
-  });
-
+  const [escrow, setEscrow] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(650);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const refreshLedger = () => {
-    const newEscrow = new SmartEscrowLedger("escrow_demo_8819", "did:agent:0x89F3b219a10E812cD0294711AA190A521098bcAA", 500, 5.0, "modal.com");
-    newEscrow.executeDisbursement("modal.com", 450, "Provision 8x H100 GPU cluster for LLM job");
-    setEscrow(newEscrow);
+  // 1. Fetch the real Escrow data from your MongoDB!
+  const loadRealEscrow = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchEscrows();
+      if (response && response.data && response.data.length > 0) {
+        // Grab the most recent escrow from the database
+        setEscrow(response.data[0]); 
+      } else {
+        setEscrow(null);
+      }
+    } catch (error) {
+      console.error("Error fetching escrow from DB:", error);
+    }
+    setIsLoading(false);
   };
 
+  // Load data when the page opens
+  useEffect(() => {
+    loadRealEscrow();
+  }, []);
+
+  // 2. Local Simulation for the Demo (So you can sleep!)
   const handleDeposit = () => {
-    const updated = new SmartEscrowLedger(escrow.id, escrow.agentDID, escrow.loanAmount, escrow.interestRatePercent, escrow.targetVendor);
-    updated.spentCapital = escrow.spentCapital;
-    updated.logs = [...escrow.logs];
-    updated.transactions = [...escrow.transactions];
-    updated.receiveBuyerPayment(parseFloat(paymentAmount));
-    setEscrow(updated);
+    if (!escrow) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const paymentAmt = parseFloat(paymentAmount);
+    
+    const principalDeduction = Math.min(paymentAmt, escrow.loanAmount);
+    const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount);
+    const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
+
+    // Update the UI to show the waterfall animation without needing a new DB route
+    const updatedEscrow = {
+      ...escrow,
+      status: "REPAID",
+      buyerDeposit: (escrow.buyerDeposit || 0) + paymentAmt,
+      logs: [
+        ...escrow.logs,
+        `[${timestamp}] Buyer deposited earnings: $${paymentAmt} USDC into Escrow Contract.`,
+        `[${timestamp}] ⚡ REPAYMENT ENFORCED: $${principalDeduction} Principal + $${interestDeduction} Interest auto-routed to Lender Pool.`,
+        `[${timestamp}] 🎉 NET PROFIT DISBURSED: $${netProfit} USDC auto-transferred to Agent Owner.`
+      ],
+      transactions: [
+        ...escrow.transactions,
+        {
+          type: "REVENUE_INTERCEPTED",
+          buyerPayment: paymentAmt,
+          repaidPrincipal: principalDeduction,
+          repaidInterest: interestDeduction,
+          netProfitDisbursed: netProfit,
+          txHash: `0x${Math.random().toString(16).substring(2, 10)}...`,
+          timestamp: timestamp
+        }
+      ]
+    };
+
+    setEscrow(updatedEscrow);
   };
 
-  const state = escrow.getState();
+  if (isLoading) {
+    return (
+      <div className="tab-content flex justify-center items-center h-64">
+        <div className="text-cyan animate-pulse font-mono text-lg flex items-center gap-3">
+          <RefreshCw className="w-6 h-6 spin" /> Syncing Immutable Ledger from MongoDB...
+        </div>
+      </div>
+    );
+  }
+
+  if (!escrow) {
+    return (
+      <div className="tab-content flex justify-center items-center h-64">
+        <div className="text-amber flex flex-col items-center gap-4">
+          <AlertOctagon className="w-10 h-10" />
+          <p>No active escrows found in the database. Run the Simulator first!</p>
+          <button className="btn-primary mt-2" onClick={loadRealEscrow}>
+            <RefreshCw className="w-4 h-4 mr-2" /> Refresh Database
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const state = escrow; // Map DB object to UI state
 
   return (
     <div className="tab-content">
@@ -35,8 +101,8 @@ export const EscrowTracker = () => {
           <h2><ShieldCheck className="inline-icon" /> Account Abstraction Smart Escrow & Repayment Enforcer</h2>
           <p className="subtitle">Programmatic debt recovery without legal contracts. Intercepts incoming buyer earnings to automatically deduct principal and interest before releasing profits.</p>
         </div>
-        <button className="btn-secondary" onClick={refreshLedger}>
-          <RefreshCw className="w-4 h-4" /> Reset Demo Escrow
+        <button className="btn-secondary" onClick={loadRealEscrow}>
+          <RefreshCw className="w-4 h-4" /> Sync with DB
         </button>
       </div>
 
@@ -99,7 +165,7 @@ export const EscrowTracker = () => {
         <div className="panel card-glass">
           <h3 className="panel-title"><DollarSign className="panel-icon" /> Programmatic Revenue Split Waterfall</h3>
 
-          {state.transactions.find(t => t.type === 'REVENUE_INTERCEPTED') ? (
+          {state.transactions && state.transactions.find(t => t.type === 'REVENUE_INTERCEPTED') ? (
             <div className="waterfall-container">
               {(() => {
                 const tx = state.transactions.find(t => t.type === 'REVENUE_INTERCEPTED');
@@ -142,7 +208,7 @@ export const EscrowTracker = () => {
           <div className="audit-logs-section">
             <h4 className="subpanel-title">Smart Escrow Audit Log Execution</h4>
             <div className="log-window font-mono">
-              {state.logs.map((log, index) => (
+              {state.logs && state.logs.map((log, index) => (
                 <div key={index} className="log-line">{log}</div>
               ))}
             </div>

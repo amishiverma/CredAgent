@@ -457,7 +457,7 @@ export function Landing({ onEnter }) {
           <span>Cred<em>Agent</em></span>
         </div>
         <div className="ca-topbar__right">
-          <div className="ca-chain"><i />ARBITRUM SEPOLIA</div>
+          {/* <div className="ca-chain"><i />ARBITRUM SEPOLIA</div> */}
           <button className="ca-btn" onClick={onEnter}>
             Launch protocol <Arrow />
           </button>
@@ -812,7 +812,7 @@ export function Landing({ onEnter }) {
 
       <footer className="ca-footer">
         <div>CREDAGENT PROTOCOL — AUTONOMOUS AGENT UNDERWRITING</div>
-        <div>ARBITRUM SEPOLIA · TESTNET</div>
+        {/* <div>ARBITRUM SEPOLIA · TESTNET</div> */}
       </footer>
     </div>
   );

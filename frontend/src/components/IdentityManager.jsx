@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AgentIdentityEngine } from '../engine/AgentIdentity';
-import { MOCK_AGENTS } from '../data/mockAgents';
 import { ShieldCheck, Key, UserCheck, Copy, Check, Lock, ChevronRight } from 'lucide-react';
+import { fetchAgents, createAgent } from '../services/api.js'; // Import both API functions
 
 export const IdentityManager = () => {
-  const [selectedAgent, setSelectedAgent] = useState(MOCK_AGENTS[0]);
+  const [agents, setAgents] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const [copied, setCopied] = useState(false);
   const [customParent, setCustomParent] = useState("0x71C88219A91823BCA8102910AA891283");
   const [newAgentName, setNewAgentName] = useState("");
   const [generatedDID, setGeneratedDID] = useState(null);
+
+  // 1. Fetch real agents from MongoDB
+  useEffect(() => {
+    const loadAgents = async () => {
+      const response = await fetchAgents();
+      if (response && response.data) {
+        setAgents(response.data);
+        if (response.data.length > 0) setSelectedAgent(response.data[0]);
+      }
+    };
+    loadAgents();
+  }, []);
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
@@ -16,24 +29,49 @@ export const IdentityManager = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleGenerate = (e) => {
+  // 2. Save the new agent to MongoDB when generated!
+  const handleGenerate = async (e) => {
     e.preventDefault();
     if (!newAgentName) return;
-    const did = AgentIdentityEngine.generateDID(customParent, newAgentName);
-    setGeneratedDID({
+    
+    // Save to Database
+    const res = await createAgent({
       name: newAgentName,
-      did,
-      parent: customParent,
-      timestamp: new Date().toLocaleTimeString()
+      owner: customParent,
+      reputation: 800,
+      collateral: 500
     });
+
+    if (res && res.data) {
+      setGeneratedDID({
+        name: res.data.name,
+        did: res.data.did,
+        parent: res.data.owner,
+        timestamp: new Date(res.data.createdAt).toLocaleTimeString()
+      });
+      
+      // Refresh the list to show the newly saved agent
+      const updated = await fetchAgents();
+      if (updated && updated.data) setAgents(updated.data);
+      setNewAgentName(""); // clear input
+    }
   };
+
+  // 3. PROTECT AGAINST CRASH: Wait for DB to load before rendering
+  if (!selectedAgent) {
+    return (
+      <div className="tab-content flex justify-center items-center h-64">
+        <div className="text-cyan animate-pulse">Loading Agents from Database...</div>
+      </div>
+    );
+  }
 
   const delegationResult = AgentIdentityEngine.verifyDelegation(
     selectedAgent.did,
     "0x981723812938192318923819283912831293",
     ["GPU_COMPUTE", "INFERENCE_API", "DEFI_SWAP"]
   );
-
+  
   return (
     <div className="tab-content">
       <div className="section-header">

@@ -56,7 +56,7 @@ export const Navbar = ({ onOpenPitch, activeTab, setActiveTab }) => {
         <div className="nav-actions">
           <div className="network-pill">
             <span className="dot pulse"></span>
-            <span className="network-name">Arbitrum Sepolia (Testnet)</span>
+            {/* <span className="network-name">Arbitrum Sepolia (Testnet)</span> */}
           </div>
 
           <button className="judge-pitch-btn" onClick={onOpenPitch}>

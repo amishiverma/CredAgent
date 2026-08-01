@@ -1,57 +1,49 @@
 import express from 'express';
-import { initialAgents } from '../data/agentsData.js';
+import Agent from '../models/Agent.js'; // Import your new Mongoose model
 
 const router = express.Router();
-let agents = [...initialAgents];
 
-// GET /api/agents - Get all registered agents
-router.get('/', (req, res) => {
-  res.json({
-    status: 'success',
-    count: agents.length,
-    data: agents
-  });
-});
-
-// GET /api/agents/:did - Get agent by DID
-router.get('/:did', (req, res) => {
-  const agent = agents.find(a => a.did === req.params.did || a.id === req.params.did);
-  if (!agent) {
-    return res.status(404).json({ status: 'error', message: 'Agent identity not found' });
+// GET /api/agents - Fetch from MongoDB
+router.get('/', async (req, res) => {
+  try {
+    const agents = await Agent.find().sort({ createdAt: -1 });
+    res.json({ status: 'success', count: agents.length, data: agents });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
   }
-  res.json({ status: 'success', data: agent });
 });
 
-// POST /api/agents - Register new agent identity
-router.post('/', (req, res) => {
+// GET /api/agents/:did
+router.get('/:did', async (req, res) => {
+  try {
+    const agent = await Agent.findOne({ $or: [{ did: req.params.did }, { id: req.params.did }] });
+    if (!agent) return res.status(404).json({ status: 'error', message: 'Agent not found' });
+    res.json({ status: 'success', data: agent });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+// POST /api/agents - Save to MongoDB
+router.post('/', async (req, res) => {
   const { name, owner, type, reputation = 700, collateral = 500 } = req.body;
 
-  if (!name || !owner) {
-    return res.status(400).json({ status: 'error', message: 'Name and owner address are required' });
+  try {
+    const newAgent = await Agent.create({
+      id: `agent_${Date.now()}`,
+      did: `did:cred:agent:${Math.random().toString(36).substring(2, 9)}`,
+      name,
+      owner,
+      type: type || 'Autonomous Task Agent',
+      reputation: Number(reputation),
+      walletBalance: Number(collateral),
+      collateralStaked: Number(collateral)
+    });
+
+    res.status(201).json({ status: 'success', message: 'Agent registered', data: newAgent });
+  } catch (error) {
+    res.status(400).json({ status: 'error', message: error.message });
   }
-
-  const newAgent = {
-    id: `agent_${Date.now()}`,
-    did: `did:cred:agent:${Math.random().toString(36).substring(2, 9)}`,
-    name,
-    owner,
-    type: type || 'Autonomous Task Agent',
-    reputation: Number(reputation),
-    successRate: 98.5,
-    completedTasks: 0,
-    historicalDefaults: 0,
-    walletBalance: Number(collateral),
-    collateralStaked: Number(collateral),
-    createdAt: new Date().toISOString()
-  };
-
-  agents.unshift(newAgent);
-
-  res.status(201).json({
-    status: 'success',
-    message: 'Agent Decentralized Identity registered successfully',
-    data: newAgent
-  });
 });
 
 export default router;

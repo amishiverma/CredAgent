@@ -21,24 +21,62 @@ const seeded = (seed) => () => {
   return seed / 4294967296;
 };
 
-const HERO_BARS = (() => {
+const HERO_CANDLES = (() => {
   const r = seeded(20260801);
-  let v = 0.42;
-  return Array.from({ length: 46 }, (_, i) => {
-    v = Math.min(0.94, Math.max(0.12, v + (r() - 0.44) * 0.16));
-    return { i, h: v, up: r() > 0.42 };
+  let price = 200; 
+  return Array.from({ length: 60 }, (_, i) => {
+    const open = price;
+    // Create a specific trend to match the screenshot roughly
+    let bias = 0;
+    if (i < 10) bias = 8; // Downward
+    else if (i < 20) bias = -12; // Upward
+    else if (i > 40 && i < 50) bias = 8; 
+    else bias = -8; 
+
+    const change = (r() - 0.5) * 15 + bias;
+    const close = open + change;
+    price = close;
+    const up = close < open; 
+    
+    const high = Math.min(open, close) - r() * 15;
+    const low = Math.max(open, close) + r() * 15;
+
+    return { i, open, close, high, low, up };
   });
 })();
 
-/* Agent reputation history that the underwriting scrub reads from. */
-const SCORE_SERIES = (() => {
-  const r = seeded(773311);
-  let v = 545;
-  return Array.from({ length: 72 }, () => {
-    v = Math.min(838, Math.max(505, v + (r() - 0.41) * 34));
-    return Math.round(v);
+/* Authentic, volatile trading data for up-and-down candlestick patterns */
+const SCORE_CANDLES = (() => {
+  const r = seeded(884422);
+  let currentPrice = 650; // start in the middle of [480, 860]
+  return Array.from({ length: 144 }, (_, i) => {
+    const open = currentPrice;
+    
+    // Highly volatile moves for clear up/down patterns
+    let move = (r() - 0.49) * 45; 
+    
+    // Occasionally create a massive market move (very tall candle body)
+    if (r() > 0.85) {
+      move *= 4; 
+    }
+    
+    // Soft boundaries to keep the chart looking authentic but visible
+    if (open > 800) move -= Math.abs(move) * 0.4;
+    if (open < 520) move += Math.abs(move) * 0.4;
+    
+    const close = open + move;
+    
+    const up = close >= open;
+    // Long wicks exactly like CryptOwl
+    const high = Math.max(open, close) + r() * 45 + 10;
+    const low = Math.min(open, close) - r() * 45 - 10;
+    
+    currentPrice = close;
+    return { i, open, close, high, low, up, score: close };
   });
 })();
+
+const SCORE_SERIES = SCORE_CANDLES.map(c => c.score);
 
 /* Mirrors frontend/src/engine/CreditScoring.js so the landing page and the
    live underwriting engine can never disagree. */
@@ -110,6 +148,7 @@ export function Landing({ onEnter }) {
   const aprRef = useRef(null);
   const limitRef = useRef(null);
   const scanRef = useRef(null);
+  const chartWrapperRef = useRef(null);
   const barsRef = useRef([]);
   const railRef = useRef([]);
   const rowsRef = useRef([]);
@@ -201,7 +240,8 @@ export function Landing({ onEnter }) {
         scrollTrigger: {
           trigger: '.ca-hero',
           start: 'top top',
-          end: 'bottom top',
+          end: '+=1200',
+          pin: true,
           scrub: 1,
         },
       })
@@ -295,10 +335,11 @@ export function Landing({ onEnter }) {
         scrub: 1,
         onUpdate: (self) => {
           scanState.p = self.progress;
-          const idx = Math.min(
-            SCORE_SERIES.length - 1,
-            Math.floor(self.progress * (SCORE_SERIES.length - 1))
-          );
+          const windowSize = 20;
+          const maxStart = SCORE_SERIES.length - windowSize;
+          const startIdx = Math.min(maxStart, Math.floor(self.progress * (maxStart + 0.999)));
+          const idx = startIdx + windowSize - 1;
+          
           const score = SCORE_SERIES[idx];
           const t = tierFor(score);
 
@@ -312,12 +353,25 @@ export function Landing({ onEnter }) {
             limitRef.current.textContent = t.ok ? `$${t.limit.toLocaleString()}` : 'Declined';
             limitRef.current.className = t.ok ? 'is-pos' : 'is-neg';
           }
-          if (scanRef.current) {
-            scanRef.current.style.left = `${(idx / (SCORE_SERIES.length - 1)) * 100}%`;
+          
+          const chartWidth = 2500;
+          const itemWidth = chartWidth / SCORE_SERIES.length;
+          const panX = self.progress * (chartWidth - 1000);
+          
+          if (chartWrapperRef.current) {
+            chartWrapperRef.current.setAttribute('transform', `translate(${-panX}, 0)`);
           }
+
+          if (scanRef.current) {
+            const leftPx = startIdx * itemWidth - panX;
+            const widthPx = windowSize * itemWidth;
+            scanRef.current.style.left = `${(leftPx / 1000) * 100}%`;
+            scanRef.current.style.width = `${(widthPx / 1000) * 100}%`;
+          }
+          
           bars.forEach((b, i) => {
             if (!b) return;
-            const on = i <= idx;
+            const on = i >= startIdx && i <= idx;
             b.style.opacity = on ? '1' : '0.16';
           });
         },
@@ -340,14 +394,18 @@ export function Landing({ onEnter }) {
         ease: 'expo.out',
         stagger: 0.1,
       });
-      gsap.from('.ca-row', {
-        scrollTrigger: { trigger: '.ca-machine', start: 'top 78%', toggleActions: 'play none none reverse' },
-        x: 60,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.09,
-      });
+      gsap.fromTo('.ca-row', 
+        { x: 60, opacity: 0 },
+        {
+          scrollTrigger: { trigger: '.ca-machine', start: 'top 78%', toggleActions: 'play none none reverse' },
+          x: 0,
+          opacity: 1,
+          clearProps: 'transform',
+          duration: 0.8,
+          ease: 'power3.out',
+          stagger: 0.09,
+        }
+      );
 
       ScrollTrigger.create({
         trigger: '.ca-control',
@@ -365,13 +423,52 @@ export function Landing({ onEnter }) {
       });
 
       /* ---------- 6. Rollup graph draws itself ---------- */
+      // 1. Floating dots animation (detach from rail and land on graph nodes)
+      const floatTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.ca-rollup',
+          start: 'top 95%',
+          end: 'top 15%',
+          scrub: 1.5,
+        }
+      });
+      
+      gsap.set('.ca-node-core', { opacity: 0 });
+      
+      floatTl.to(railRef.current, {
+        x: (index, target) => {
+          const nodes = document.querySelectorAll('.ca-node-core');
+          if (!nodes.length) return 0;
+          const nodeIndex = Math.min(index, nodes.length - 1);
+          const svgRect = nodes[nodeIndex].getBoundingClientRect();
+          const targetRect = target.getBoundingClientRect();
+          return svgRect.left + (svgRect.width / 2) - (targetRect.left + (targetRect.width / 2));
+        },
+        y: (index, target) => {
+          const nodes = document.querySelectorAll('.ca-node-core');
+          if (!nodes.length) return 0;
+          const nodeIndex = Math.min(index, nodes.length - 1);
+          const svgRect = nodes[nodeIndex].getBoundingClientRect();
+          const targetRect = target.getBoundingClientRect();
+          return svgRect.top + (svgRect.height / 2) - (targetRect.top + (targetRect.height / 2));
+        },
+        backgroundColor: '#ffffff',
+        boxShadow: 'none',
+        scale: 1.5,
+        ease: 'power2.inOut'
+      }, 0);
+      
+      floatTl.to(railRef.current, { opacity: 0, duration: 0.05 }, 0.95);
+      floatTl.to('.ca-node-core', { opacity: 1, duration: 0.05 }, 0.95);
+
+      // 2. Draw the graph links as the dots land
       const links = gsap.utils.toArray('.ca-graph .ca-link');
       links.forEach((p) => {
         const len = p.getTotalLength();
         gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
       });
       gsap.timeline({
-        scrollTrigger: { trigger: '.ca-rollup__frame', start: 'top 74%', toggleActions: 'play none none reverse' },
+        scrollTrigger: { trigger: '.ca-rollup', start: 'top 15%', toggleActions: 'play none none reverse' },
       })
         .to(links, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut', stagger: 0.12 })
         .from('.ca-graph .ca-nodegroup', { scale: 0, transformOrigin: 'center', opacity: 0, duration: 0.7, ease: 'back.out(2)', stagger: 0.1 }, 0.4)
@@ -452,9 +549,9 @@ export function Landing({ onEnter }) {
 
       {/* ---------------- Top bar ---------------- */}
       <header className="ca-topbar">
-        <div className="ca-wordmark">
-          <Mark />
-          <span>Cred<em>Agent</em></span>
+        <div className="ca-wordmark" style={{ flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
+          <img src="/logo.png" alt="CredAgent Logo" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+          <img src="/wordmark.png" alt="CredAgent Wordmark" style={{ width: '120px', objectFit: 'contain' }} />
         </div>
         <div className="ca-topbar__right">
           {/* <div className="ca-chain"><i />ARBITRUM SEPOLIA</div> */}
@@ -474,18 +571,47 @@ export function Landing({ onEnter }) {
             <span className="ca-plane__grid" />
           </div>
 
-          <svg className="ca-bars" viewBox="0 0 460 300" preserveAspectRatio="none">
-            {HERO_BARS.map((b) => (
-              <rect
-                key={b.i}
-                x={b.i * 10}
-                y={150 - b.h * 90}
-                width="5"
-                height={Math.max(8, b.h * 180)}
-                fill={b.up ? '#7ee2f4' : '#4179de'}
-                opacity={0.55 + b.h * 0.4}
-              />
-            ))}
+          <svg className="ca-bars" viewBox="0 0 600 300" preserveAspectRatio="none">
+            {/* Price labels and horizontal grid lines to match Image 1 */}
+            <g stroke="rgba(255,255,255,0.04)" strokeWidth="1" fontSize="9" fill="rgba(255,255,255,0.3)">
+              {[
+                { y: 50, label: "74K" },
+                { y: 100, label: "72K" },
+                { y: 150, label: "70K" },
+                { y: 200, label: "68K" },
+                { y: 250, label: "66K" }
+              ].map((grid, i) => (
+                <g key={i}>
+                  <line x1="0" y1={grid.y} x2="600" y2={grid.y} />
+                  <text x="575" y={grid.y + 3}>{grid.label}</text>
+                </g>
+              ))}
+            </g>
+
+            {HERO_CANDLES.map((c) => {
+              if (c.i > 22 && c.i < 37) return null;
+              
+              const color = c.up ? '#7ee2f4' : '#4179de';
+              return (
+                <g key={c.i} opacity={0.75}>
+                  <line 
+                    x1={c.i * 10 + 2.5} 
+                    y1={c.high} 
+                    x2={c.i * 10 + 2.5} 
+                    y2={c.low} 
+                    stroke={color} 
+                    strokeWidth="1" 
+                  />
+                  <rect
+                    x={c.i * 10}
+                    y={Math.min(c.open, c.close)}
+                    width="5"
+                    height={Math.max(2, Math.abs(c.open - c.close))}
+                    fill={color}
+                  />
+                </g>
+              );
+            })}
           </svg>
 
           <svg className="ca-arch" viewBox="0 0 300 400" preserveAspectRatio="xMidYMax meet">
@@ -588,36 +714,69 @@ export function Landing({ onEnter }) {
 
         <div className="ca-scrub__stage">
           <svg className="ca-scrub__chart" viewBox="0 0 1000 300" preserveAspectRatio="none">
-            {SCORE_SERIES.map((s, i) => {
-              const h = ((s - 480) / 380) * 280;
-              return (
-                <rect
-                  key={i}
-                  ref={(el) => (barsRef.current[i] = el)}
-                  x={i * (1000 / SCORE_SERIES.length) + 2}
-                  y={300 - h}
-                  width={1000 / SCORE_SERIES.length - 4}
-                  height={Math.max(3, h)}
-                  fill={s >= 700 ? '#7ee2f4' : s >= 620 ? '#4179de' : '#e26870'}
-                  opacity="0.16"
-                />
-              );
-            })}
+            <g ref={chartWrapperRef}>
+              {SCORE_CANDLES.map((c, i) => {
+                const mapY = (val) => 300 - ((val - 480) / 380) * 280;
+                const yOpen = mapY(c.open);
+                const yClose = mapY(c.close);
+                const yHigh = mapY(c.high);
+                const yLow = mapY(c.low);
+                
+                const yBody = Math.min(yOpen, yClose);
+                const bodyHeight = Math.max(4, Math.abs(yOpen - yClose));
+                const color = c.up ? '#7ee2f4' : '#4179de';
+                
+                const chartWidth = 2500;
+                const itemWidth = chartWidth / SCORE_CANDLES.length;
+                const xCenter = i * itemWidth + itemWidth / 2;
+                // Tightly packed candles like CryptOwl
+                const boxWidth = Math.max(2, itemWidth - 6); 
+                const xLeft = xCenter - (boxWidth / 2);
+
+                return (
+                  <g key={i} ref={(el) => (barsRef.current[i] = el)} opacity="0.16">
+                    <line 
+                      x1={xCenter} 
+                      y1={yHigh} 
+                      x2={xCenter} 
+                      y2={yLow} 
+                      stroke={color} 
+                      strokeWidth="1" 
+                    />
+                    <rect
+                      x={xLeft}
+                      y={yBody}
+                      width={boxWidth}
+                      height={bodyHeight}
+                      fill={color}
+                    />
+                  </g>
+                );
+              })}
+            </g>
           </svg>
 
           <div
             ref={scanRef}
             style={{
               position: 'absolute',
-              top: 0,
-              bottom: 0,
+              top: '15%',
+              bottom: '15%',
               left: '0%',
-              width: 1,
-              background: 'var(--ca-accent)',
-              boxShadow: '0 0 18px var(--ca-accent)',
+              width: '0%',
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderLeft: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRight: '1px solid rgba(255, 255, 255, 0.2)',
               pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}
-          />
+          >
+            <div style={{ width: 6, height: 6, background: '#fff', borderRadius: '50%', transform: 'translateX(-3px)' }} />
+            <div style={{ height: 1, flex: 1, background: 'rgba(255, 255, 255, 0.1)' }} />
+            <div style={{ width: 6, height: 6, background: '#fff', borderRadius: '50%', transform: 'translateX(3px)' }} />
+          </div>
         </div>
 
         <dl className="ca-scrub__readout">

@@ -174,9 +174,9 @@ export const AgentSimulator = () => {
       </div>
 
       {/* Dynamic Custom Loan Creator Form */}
-      <div className="panel card-glass margin-bottom-lg border-cyan">
+      <div className="panel card-glass margin-bottom-lg" style={{ border: '2px solid var(--ca-purple)', boxShadow: '0 0 40px rgba(112, 0, 255, 0.3) inset, 0 0 50px rgba(112, 0, 255, 0.4)' }}>
         <h3 className="panel-title"><PlusCircle className="panel-icon" /> Create & Launch Custom Live Agent Loan Request</h3>
-        <p className="panel-desc">Test any agent name, custom loan amount, vendor domain, and buyer payoff live against your Lender Pool!</p>
+        <p className="panel-desc">Test any agent name, custom loan amount, vendor endpoint, and buyer payoff live against your Lender Pool!</p>
 
         <form onSubmit={handleRunCustomLoan} className="custom-loan-form">
           <div className="grid-3col">
@@ -192,7 +192,7 @@ export const AgentSimulator = () => {
             </div>
 
             <div className="form-group">
-              <label>Requested Loan Amount ($)</label>
+              <label>Requested Loan Amount (₹)</label>
               <input 
                 type="number" 
                 value={customLoanAmount} 
@@ -203,7 +203,7 @@ export const AgentSimulator = () => {
             </div>
 
             <div className="form-group">
-              <label>Expected Buyer Payoff ($)</label>
+              <label>Expected Buyer Payoff (₹)</label>
               <input 
                 type="number" 
                 value={customPayoff} 
@@ -254,13 +254,22 @@ export const AgentSimulator = () => {
 
       <div className="scenario-cards-grid">
         {/* Scenario A Card */}
-        <div className={`scenario-card ${activeScenario === 'A' ? 'selected' : ''}`}>
+        <div 
+          className={`scenario-card ${activeScenario === 'A' ? 'selected' : ''}`}
+          style={{ 
+            backgroundImage: 'linear-gradient(to bottom, rgba(14, 16, 28, 0.2), rgba(14, 16, 28, 0.95)), url(/preset_cpu_1785667549694.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            border: '2px solid var(--ca-purple)',
+            boxShadow: '0 0 20px rgba(112, 0, 255, 0.3)'
+          }}
+        >
           <div className="sc-header">
-            <span className="sc-tag tag-success">PRESET A</span>
+            <span className="sc-tag" style={{ background: 'var(--primary-cyan)', color: '#000' }}>PRESET A</span>
             <Cpu className="sc-icon text-cyan" />
           </div>
-          <h3>Enterprise Compute Micro-Loan</h3>
-          <p>Nexus-7 requests $500 loan to purchase H100 GPUs for fine-tuning. Client deposits $650 payoff into escrow. Auto-repayment deducts $525, releasing $125 profit.</p>
+          <h3 style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Enterprise Compute Micro-Loan</h3>
+          <p style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Nexus-7 requests ₹41,000 loan to purchase H100 GPUs for fine-tuning. Client deposits ₹53,000 payoff into escrow. Auto-repayment deducts ₹43,000, releasing ₹10,000 profit.</p>
           <div className="sc-footer">
             <button 
               className="btn-primary full-width" 
@@ -274,13 +283,22 @@ export const AgentSimulator = () => {
         </div>
 
         {/* Scenario B Card */}
-        <div className={`scenario-card ${activeScenario === 'B' ? 'selected' : ''}`}>
+        <div 
+          className={`scenario-card ${activeScenario === 'B' ? 'selected' : ''}`}
+          style={{ 
+            backgroundImage: 'linear-gradient(to bottom, rgba(14, 16, 28, 0.2), rgba(14, 16, 28, 0.95)), url(/preset_dex_1785667560596.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            border: '2px solid var(--ca-purple)',
+            boxShadow: '0 0 20px rgba(112, 0, 255, 0.3)'
+          }}
+        >
           <div className="sc-header">
-            <span className="sc-tag tag-purple">PRESET B</span>
+            <span className="sc-tag" style={{ background: 'var(--ca-purple)', color: '#fff' }}>PRESET B</span>
             <Zap className="sc-icon text-purple" />
           </div>
-          <h3>Cross-DEX Arbitrage Credit</h3>
-          <p>Aether-X requests $1,000 flash working capital for Uniswap V3 arbitrage. Principal + APY auto-deducted with instant settlement.</p>
+          <h3 style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Cross-DEX Arbitrage Credit</h3>
+          <p style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Aether-X requests ₹82,000 flash working capital for Uniswap V3 arbitrage. Principal + APY auto-deducted with instant settlement.</p>
           <div className="sc-footer">
             <button 
               className="btn-purple full-width" 
@@ -294,13 +312,22 @@ export const AgentSimulator = () => {
         </div>
 
         {/* Scenario C Card */}
-        <div className={`scenario-card danger-card ${activeScenario === 'C' ? 'selected' : ''}`}>
+        <div 
+          className={`scenario-card ${activeScenario === 'C' ? 'selected' : ''}`}
+          style={{ 
+            backgroundImage: 'linear-gradient(to bottom, rgba(14, 16, 28, 0.2), rgba(14, 16, 28, 0.95)), url(/preset_lock_1785667570738.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            border: '2px solid var(--ca-purple)',
+            boxShadow: '0 0 20px rgba(112, 0, 255, 0.3)'
+          }}
+        >
           <div className="sc-header">
             <span className="sc-tag tag-danger">PRESET C (ATTACK)</span>
             <ShieldAlert className="sc-icon text-amber" />
           </div>
-          <h3>Rogue Agent Attack & Recovery</h3>
-          <p>Shadow-V attempts unauthorized spend to non-whitelisted address. Real-time Circuit Breaker fires in &lt;24ms, freezing escrow and reclaiming 100% capital.</p>
+          <h3 style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Rogue Agent Attack & Recovery</h3>
+          <p style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>Shadow-V attempts unauthorized spend to non-whitelisted address. Real-time Circuit Breaker fires in +24ms, freezing escrow and reclaiming 100% capital.</p>
           <div className="sc-footer">
             <button 
               className="btn-danger full-width" 

@@ -8,11 +8,13 @@ import { EscrowTracker } from './components/EscrowTracker';
 import { IdentityManager } from './components/IdentityManager';
 import { PitchDeckModal } from './components/PitchDeckModal';
 import { Landing } from './components/Landing';
+import { AdminDashboard } from './components/AdminDashboard';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('simulator');
   const [isPitchOpen, setIsPitchOpen] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   if (!hasEntered) {
     return <Landing onEnter={() => { window.scrollTo(0, 0); setHasEntered(true); }} />;
@@ -24,6 +26,8 @@ export function App() {
         onOpenPitch={() => setIsPitchOpen(true)}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        onReturnHome={() => setHasEntered(false)}
+        onOpenAdmin={() => setShowAdmin(true)}
       />
 
       <main className="app-container">
@@ -40,6 +44,10 @@ export function App() {
         isOpen={isPitchOpen}
         onClose={() => setIsPitchOpen(false)}
       />
+
+      {showAdmin && (
+        <AdminDashboard onClose={() => setShowAdmin(false)} />
+      )}
     </div>
   );
 }

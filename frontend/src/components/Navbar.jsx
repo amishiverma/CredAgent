@@ -1,19 +1,12 @@
 import React from 'react';
 import { ShieldCheck, Cpu, Zap, Award, Sparkles, Terminal, Wallet } from 'lucide-react';
 
-export const Navbar = ({ onOpenPitch, activeTab, setActiveTab }) => {
+export const Navbar = ({ onOpenPitch, activeTab, setActiveTab, onReturnHome, onOpenAdmin }) => {
   return (
     <header className="navbar">
       <div className="nav-container">
-        <div className="brand">
-          <div className="logo-icon">
-            <ShieldCheck className="icon-main" />
-            <Zap className="icon-badge" />
-          </div>
-          <div className="brand-text">
-            <span className="brand-title">CredAgent <span className="gradient-text">Protocol</span></span>
-            <span className="brand-subtitle">Credit for Autonomous AI Agents</span>
-          </div>
+        <div className="brand" onClick={onReturnHome} style={{ cursor: 'pointer' }}>
+          <img src="/logo.png" alt="CredAgent Logo" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
         </div>
 
         <nav className="nav-tabs">
@@ -53,18 +46,13 @@ export const Navbar = ({ onOpenPitch, activeTab, setActiveTab }) => {
           </button>
         </nav>
 
-        <div className="nav-actions">
-          <div className="network-pill">
-            <span className="dot pulse"></span>
-            {/* <span className="network-name">Arbitrum Sepolia (Testnet)</span> */}
+        <button className="profile-badge" onClick={onOpenAdmin} style={{ cursor: 'pointer' }}>
+          <img src="/profile_pic_1785667538497.png" alt="Profile" className="profile-img" />
+          <div className="profile-info">
+            <span className="profile-greeting">Welcome back,</span>
+            <span className="profile-name">CredAgent Admin</span>
           </div>
-
-          <button className="judge-pitch-btn" onClick={onOpenPitch}>
-            <Award className="pitch-icon" />
-            <span>Judge Pitch Guide</span>
-            <Sparkles className="sparkle-icon" />
-          </button>
-        </div>
+        </button>
       </div>
     </header>
   );

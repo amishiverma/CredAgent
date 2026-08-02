@@ -47,9 +47,9 @@ export const EscrowTracker = () => {
       buyerDeposit: (escrow.buyerDeposit || 0) + paymentAmt,
       logs: [
         ...escrow.logs,
-        `[${timestamp}] Buyer deposited earnings: $${paymentAmt} USDC into Escrow Contract.`,
-        `[${timestamp}] ⚡ REPAYMENT ENFORCED: $${principalDeduction} Principal + $${interestDeduction} Interest auto-routed to Lender Pool.`,
-        `[${timestamp}] 🎉 NET PROFIT DISBURSED: $${netProfit} USDC auto-transferred to Agent Owner.`
+        `[${timestamp}] Buyer deposited earnings: ₹${paymentAmt} INR into Escrow Contract.`,
+        `[${timestamp}] ⚡ REPAYMENT ENFORCED: ₹${principalDeduction} Principal + ₹${interestDeduction} Interest auto-routed to Lender Pool.`,
+        `[${timestamp}] 🎉 NET PROFIT DISBURSED: ₹${netProfit} INR auto-transferred to Agent Owner.`
       ],
       transactions: [
         ...escrow.transactions,
@@ -174,7 +174,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Locked Loan Capital</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>${state.lockedCapital} USDC</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>${state.lockedCapital} INR</span>
             </div>
 
             <div style={{
@@ -200,7 +200,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Protocol Debt (Principal + Interest)</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.totalDebt} USDC <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.totalDebt} INR <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
             </div>
 
             <div style={{
@@ -213,7 +213,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Disbursed Spend</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.spentCapital} USDC</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.spentCapital} INR</span>
             </div>
           </div>
 
@@ -228,7 +228,7 @@ export const EscrowTracker = () => {
                 value={paymentAmount} 
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 className="input-dark font-mono"
-                placeholder="Buyer Payment ($)"
+                placeholder="Buyer Payment (₹)"
               />
               <button 
                 className="btn-primary" 
@@ -253,7 +253,7 @@ export const EscrowTracker = () => {
                   <>
                     <div className="waterfall-step source">
                       <div className="wf-title">Client Buyer Payout Inflow</div>
-                      <div className="wf-amount">${tx.buyerPayment} USDC</div>
+                      <div className="wf-amount">${tx.buyerPayment} INR</div>
                     </div>
 
                     <div className="waterfall-split-arrows">
@@ -263,10 +263,10 @@ export const EscrowTracker = () => {
                     <div className="waterfall-branches">
                       <div className="wf-branch lender">
                         <div className="wf-badge">LENDER POOL REPAYMENT</div>
-                        <div className="wf-detail">Principal: <strong>${tx.repaidPrincipal} USDC</strong></div>
-                        <div className="wf-detail">Interest (Yield): <strong>${tx.repaidInterest} USDC</strong></div>
+                        <div className="wf-detail">Principal: <strong>${tx.repaidPrincipal} INR</strong></div>
+                        <div className="wf-detail">Interest (Yield): <strong>${tx.repaidInterest} INR</strong></div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-emerald)' }}>
-                          ${tx.repaidPrincipal + tx.repaidInterest} USDC
+                          ${tx.repaidPrincipal + tx.repaidInterest} INR
                         </div>
                       </div>
 
@@ -274,7 +274,7 @@ export const EscrowTracker = () => {
                         <div className="wf-badge">AGENT OWNER PROFIT</div>
                         <div className="wf-detail">Net Earned Revenue:</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-cyan)' }}>
-                          ${tx.netProfitDisbursed} USDC
+                          ${tx.netProfitDisbursed} INR
                         </div>
                       </div>
                     </div>

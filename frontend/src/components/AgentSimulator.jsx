@@ -114,7 +114,7 @@ export const AgentSimulator = () => {
     };
 
     ProtocolState.addCustomLoan(loanObj);
-    await step(`💰 Capital Granted: $${amount} USDC disbursed from Lender Pool into Account Abstraction Escrow ${loanObj.id}`);
+    await step(`💰 Capital Granted: ₹${amount} INR disbursed from Lender Pool into Account Abstraction Escrow ${loanObj.id}`);
 
     // 3. Smart Escrow Execution
     const escrow = new SmartEscrowLedger(loanObj.id, loanObj.agentDID, amount, evaluation.interestRatePercent, customVendor);
@@ -135,17 +135,17 @@ export const AgentSimulator = () => {
       return;
     }
 
-    await step(`✅ Disbursed $${amount * 0.9} USDC to Whitelisted Vendor ${customVendor}. Task in progress...`);
+    await step(`✅ Disbursed ₹${amount * 0.9} INR to Whitelisted Vendor ${customVendor}. Task in progress...`);
     await step(`🎉 Task Execution Completed! Output delivered to buyer.`);
 
     // 4. Buyer Payout & Auto Repayment
-    await step(`💰 Buyer deposited $${payoff} USDC into Smart Escrow Contract...`);
+    await step(`💰 Buyer deposited ₹${payoff} INR into Smart Escrow Contract...`);
     const repayment = escrow.receiveBuyerPayment(payoff);
 
     ProtocolState.repayLoan(loanObj.id, repayment.repaidPrincipal, repayment.repaidInterest);
 
-    await step(`✨ AUTOMATED REPAYMENT EXECUTED: $${repayment.repaidPrincipal} Principal + $${repayment.repaidInterest} Interest auto-routed back to Lender Pool.`);
-    await step(`🏆 Net Profit $${repayment.netProfitToAgentOwner} USDC auto-transferred to Agent Owner!`);
+    await step(`✨ AUTOMATED REPAYMENT EXECUTED: ₹${repayment.repaidPrincipal} Principal + ₹${repayment.repaidInterest} Interest auto-routed back to Lender Pool.`);
+    await step(`🏆 Net Profit ₹${repayment.netProfitToAgentOwner} INR auto-transferred to Agent Owner!`);
 
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
@@ -378,39 +378,39 @@ export const AgentSimulator = () => {
                 <div className="summary-metrics-grid">
                   <div className="sum-card">
                     <span className="sum-label">Loan Capital Principal</span>
-                    <span className="sum-val">${result.summary.loan} USDC</span>
+                    <span className="sum-val">${result.summary.loan} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Repaid to Lender Pool</span>
-                    <span className="sum-val text-emerald">${result.summary.repaid} USDC</span>
+                    <span className="sum-val text-emerald">${result.summary.repaid} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Protocol Yield (Interest)</span>
-                    <span className="sum-val text-cyan">${result.summary.interestPaid} USDC</span>
+                    <span className="sum-val text-cyan">${result.summary.interestPaid} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Net Profit Disbursed to Owner</span>
-                    <span className="sum-val text-purple">${result.summary.netProfit} USDC</span>
+                    <span className="sum-val text-purple">${result.summary.netProfit} INR</span>
                   </div>
                 </div>
               ) : (
                 <div className="summary-metrics-grid">
                   <div className="sum-card">
                     <span className="sum-label">Attempted Loan Spend</span>
-                    <span className="sum-val">${result.summary.loan} USDC</span>
+                    <span className="sum-val">${result.summary.loan} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Capital Reclaimed to Pool</span>
-                    <span className="sum-val text-emerald">${result.summary.recovered} USDC (100%)</span>
+                    <span className="sum-val text-emerald">${result.summary.recovered} INR (100%)</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Lender Capital Loss</span>
-                    <span className="sum-val text-cyan">$0 USDC (Zero Loss)</span>
+                    <span className="sum-val text-cyan">₹0 INR (Zero Loss)</span>
                   </div>
 
                   <div className="sum-card">

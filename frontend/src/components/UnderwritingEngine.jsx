@@ -111,7 +111,7 @@ export const UnderwritingEngine = () => {
 
           <div className="grid-2col-compact">
             <div className="form-group">
-              <label>Requested Loan Amount ($)</label>
+              <label>Requested Loan Amount (₹)</label>
               <input 
                 type="number" 
                 value={requestedAmount}
@@ -123,7 +123,7 @@ export const UnderwritingEngine = () => {
             </div>
 
             <div className="form-group">
-              <label>Expected Task Payoff ($)</label>
+              <label>Expected Task Payoff (₹)</label>
               <input 
                 type="number" 
                 value={expectedPayoff}
@@ -203,7 +203,7 @@ export const UnderwritingEngine = () => {
           <div className="scorecard-metrics">
             <div className="metric-box">
               <span className="m-label">Approved Credit Limit</span>
-              <span className="m-val cyan-text">${evaluation.maxLimit} USDC</span>
+              <span className="m-val cyan-text">${evaluation.maxLimit} INR</span>
             </div>
 
             <div className="metric-box">
@@ -213,7 +213,7 @@ export const UnderwritingEngine = () => {
 
             <div className="metric-box">
               <span className="m-label">Total Debt at Maturity</span>
-              <span className="m-val font-mono">${evaluation.totalRepaymentNeeded} USDC</span>
+              <span className="m-val font-mono">${evaluation.totalRepaymentNeeded} INR</span>
             </div>
 
             <div className="metric-box">
@@ -310,7 +310,7 @@ export const UnderwritingEngine = () => {
               type="text" 
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="e.g., Analyze request: $250 for Shadow-V at suspicious-api.xyz"
+              placeholder="e.g., Analyze request: ₹250 for Shadow-V at suspicious-api.xyz"
               className="input-dark"
               style={{ flex: 1, margin: 0, fontFamily: 'var(--font-main)' }}
               disabled={isChatLoading}

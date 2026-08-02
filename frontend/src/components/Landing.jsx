@@ -108,20 +108,20 @@ const MACHINE_ROWS = [
 ];
 
 const TIERS = [
-  { rank: '01', name: 'Tier A+', sub: 'Prime Agent', score: '780 – 850', apr: '4.2%', limit: '$5,000' },
-  { rank: '02', name: 'Tier A', sub: 'Low Risk', score: '700 – 779', apr: '6.5%', limit: '$2,500' },
-  { rank: '03', name: 'Tier B', sub: 'Moderate Risk', score: '620 – 699', apr: '9.8%', limit: '$1,000' },
-  { rank: '04', name: 'Tier C', sub: 'Elevated Risk', score: '550 – 619', apr: '14.5%', limit: '$500' },
+  { rank: '01', name: 'Tier A+', sub: 'Prime Agent', score: '780 – 850', apr: '4.2%', limit: '₹5,000' },
+  { rank: '02', name: 'Tier A', sub: 'Low Risk', score: '700 – 779', apr: '6.5%', limit: '₹2,500' },
+  { rank: '03', name: 'Tier B', sub: 'Moderate Risk', score: '620 – 699', apr: '9.8%', limit: '₹1,000' },
+  { rank: '04', name: 'Tier C', sub: 'Elevated Risk', score: '550 – 619', apr: '14.5%', limit: '₹500' },
   { rank: '05', name: 'Tier D / F', sub: 'Declined', score: '300 – 549', apr: '—', limit: 'No credit', deny: true },
 ];
 
 const TICKER = [
-  ['Capital extended', '$1,482,500'],
+  ['Capital extended', '₹1,482,500'],
   ['Recovery rate', '99.42%'],
   ['Active escrows', '128'],
   ['Circuit breakers', '14'],
   ['Agent transactions', '840+'],
-  ['Collateral required', '$0'],
+  ['Collateral required', '₹0'],
 ];
 
 const Arrow = () => (
@@ -350,7 +350,7 @@ export function Landing({ onEnter }) {
           }
           if (aprRef.current) aprRef.current.textContent = `${t.apr.toFixed(1)}%`;
           if (limitRef.current) {
-            limitRef.current.textContent = t.ok ? `$${t.limit.toLocaleString()}` : 'Declined';
+            limitRef.current.textContent = t.ok ? `₹${t.limit.toLocaleString()}` : 'Declined';
             limitRef.current.className = t.ok ? 'is-pos' : 'is-neg';
           }
           
@@ -902,7 +902,7 @@ export function Landing({ onEnter }) {
           <div className="ca-stats">
             <div className="ca-stats__item">
               <dt>Capital extended</dt>
-              <dd data-count="1482500" data-prefix="$">$0</dd>
+              <dd data-count="1482500" data-prefix="₹">₹0</dd>
             </div>
             <div className="ca-stats__item">
               <dt>Recovery rate</dt>
@@ -918,7 +918,7 @@ export function Landing({ onEnter }) {
             </div>
             <div className="ca-stats__item">
               <dt>Collateral posted</dt>
-              <dd className="is-accent">$0.00</dd>
+              <dd className="is-accent">₹0.00</dd>
             </div>
           </div>
         </div>

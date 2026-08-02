@@ -56,7 +56,7 @@ export const LenderPortal = () => {
           <div className="investor-hero-card border-cyan">
             <div className="hero-stat">
               <span className="hero-label">Your Active Capital Deposited</span>
-              <span className="hero-val cyan-text">${state.userInvestment.toLocaleString()} USDC</span>
+              <span className="hero-val cyan-text">${state.userInvestment.toLocaleString()} INR</span>
             </div>
 
             <div className="hero-stat-row">
@@ -66,7 +66,7 @@ export const LenderPortal = () => {
               </div>
               <div>
                 <span className="sub-label">Your Total Interest Earned</span>
-                <span className="sub-val emerald-text font-mono">+${state.userYieldEarned.toFixed(2)} USDC</span>
+                <span className="sub-val emerald-text font-mono">+${state.userYieldEarned.toFixed(2)} INR</span>
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@ export const LenderPortal = () => {
                   value={depositAmount} 
                   onChange={(e) => setDepositAmount(e.target.value)}
                   className="input-dark font-mono"
-                  placeholder="Amount ($)"
+                  placeholder="Amount (₹)"
                   required
                 />
                 <button type="submit" className="btn-primary">Deposit</button>
@@ -99,7 +99,7 @@ export const LenderPortal = () => {
                   value={withdrawAmount} 
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   className="input-dark font-mono"
-                  placeholder="Amount ($)"
+                  placeholder="Amount (₹)"
                   required
                 />
                 <button type="submit" className="btn-secondary">Withdraw</button>
@@ -332,7 +332,7 @@ export const LenderPortal = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
                   <span>Loan Capital:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>${loan.loanAmount} USDC</strong>
+                  <strong style={{ color: 'var(--text-main)' }}>${loan.loanAmount} INR</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
                   <span>Interest APY:</span>
@@ -361,7 +361,7 @@ export const LenderPortal = () => {
                   borderTop: '1px solid var(--border-color)'
                 }}>
                   <span>Expected Payoff:</span>
-                  <strong style={{ color: 'var(--primary-purple)' }}>${loan.expectedPayoff} USDC</strong>
+                  <strong style={{ color: 'var(--primary-purple)' }}>${loan.expectedPayoff} INR</strong>
                 </div>
               </div>
             </div>

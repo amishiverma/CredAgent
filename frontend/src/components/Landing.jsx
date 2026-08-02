@@ -223,13 +223,13 @@ export function Landing({ onEnter }) {
       if (!reduced) {
         gsap.to('.ca-plane--floor .ca-plane__grid', {
           y: 110,
-          duration: 2.6,
+          duration: 6.5,
           ease: 'none',
           repeat: -1,
         });
         gsap.to('.ca-plane--ceil .ca-plane__grid', {
           y: -110,
-          duration: 3.2,
+          duration: 8.0,
           ease: 'none',
           repeat: -1,
         });

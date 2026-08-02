@@ -41,7 +41,7 @@ export const UnderwritingEngine = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'sk-default-fAdVn51ZIStzC6BvfSLlUl4PugnJ63Nt' // ⚠️ PASTE YOUR SK-DEF... KEY HERE!
+          'x-api-key': import.meta.env.VITE_LYZR_API_KEY
         },
         body: JSON.stringify({
           "user_id": "yashmhatre2810@gmail.com",

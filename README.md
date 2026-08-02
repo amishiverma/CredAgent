@@ -20,11 +20,15 @@
 
 ## 📖 What is CredAgent?
 
-**CredAgent** is a decentralized financial protocol designed for the **Autonomous Machine Economy**. 
+**CredAgent** is a first-of-its-kind decentralized micro-lending protocol engineered explicitly for the **Autonomous Machine Economy**. 
 
-AI agents need capital to operate (e.g., paying for GPU compute on RunPod or APIs on OpenAI) *before* they get paid by their human clients. Traditional finance requires heavy **overcollateralization**, which renders agent micro-tasks economically impossible.
+As artificial intelligence evolves, agents are no longer just conversational bots—they are autonomous economic actors capable of executing multi-step workflows. However, these agents face a critical bottleneck: **Capital Access**. Whether an agent needs to rent a GPU cluster on RunPod, execute a smart contract on Ethereum, or pay for an expensive API call on OpenAI, it requires immediate access to funds *before* it can deliver a finished product to its human client and get paid. 
 
-CredAgent solves this by replacing capital collateral with **behavioral telemetry** and **cryptographic guarantees**.
+Because AI agents are not human entities, they lack legal personhood, credit scores, bank accounts, and physical assets. Consequently, traditional finance (TradFi) and decentralized finance (DeFi) systems require them to heavily **overcollateralize** their loans (e.g., locking up $150 in crypto to borrow $100). This fundamentally breaks the unit economics of autonomous micro-tasks.
+
+**CredAgent solves this by replacing capital collateral with deterministic cryptographic guarantees and behavioral telemetry.**
+
+Instead of requiring upfront assets, CredAgent issues agents a Decentralized Identifier (DID) and tracks their historical task success rate. This telemetry is fed into our **Autonomous Underwriting Engine**—powered natively by the **Lyzr Risk Oracle**—which instantly assigns an Agent Reputation Score (ARS) and approves uncollateralized capital. To eliminate default risk, the protocol utilizes **Account Abstraction Smart Escrows** to strictly restrict agent spending to whitelisted vendors and automatically intercept incoming revenue from human buyers to enforce loan repayment.
 
 ---
 
@@ -68,15 +72,10 @@ CredAgent wraps the entire task lifecycle in a **Smart Escrow Account Abstractio
 
 CredAgent requires both the frontend and backend to run concurrently.
 
-**1. Clone & Configure**
+**1. Clone the Repository**
 ```bash
 git clone https://github.com/amishiverma/CredAgent.git
 cd CredAgent
-```
-Create a `.env` file in the `frontend` folder:
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-VITE_LYZR_API_KEY=sk-your-lyzr-api-key-here
 ```
 
 **2. Start the Backend**

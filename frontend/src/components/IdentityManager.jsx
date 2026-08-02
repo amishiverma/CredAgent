@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AgentIdentityEngine } from '../engine/AgentIdentity';
-import { ShieldCheck, Key, UserCheck, Copy, Check, Lock, ChevronRight } from 'lucide-react';
-import { fetchAgents, createAgent } from '../services/api.js'; // Import both API functions
+import { ShieldCheck, Key, UserCheck, Copy, Check, Lock, ChevronRight, AlertOctagon } from 'lucide-react';
+import { fetchAgents, createAgent } from '../services/api.js';
 
 export const IdentityManager = () => {
   const [agents, setAgents] = useState([]);
@@ -10,15 +10,18 @@ export const IdentityManager = () => {
   const [customParent, setCustomParent] = useState("0x71C88219A91823BCA8102910AA891283");
   const [newAgentName, setNewAgentName] = useState("");
   const [generatedDID, setGeneratedDID] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Fetch real agents from MongoDB
+  // Fetch real agents from MongoDB
   useEffect(() => {
     const loadAgents = async () => {
+      setIsLoading(true);
       const response = await fetchAgents();
       if (response && response.data) {
         setAgents(response.data);
         if (response.data.length > 0) setSelectedAgent(response.data[0]);
       }
+      setIsLoading(false);
     };
     loadAgents();
   }, []);
@@ -29,12 +32,11 @@ export const IdentityManager = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // 2. Save the new agent to MongoDB when generated!
+  // Save the new agent to MongoDB when generated!
   const handleGenerate = async (e) => {
     e.preventDefault();
     if (!newAgentName) return;
     
-    // Save to Database
     const res = await createAgent({
       name: newAgentName,
       owner: customParent,
@@ -50,15 +52,16 @@ export const IdentityManager = () => {
         timestamp: new Date(res.data.createdAt).toLocaleTimeString()
       });
       
-      // Refresh the list to show the newly saved agent
       const updated = await fetchAgents();
-      if (updated && updated.data) setAgents(updated.data);
-      setNewAgentName(""); // clear input
+      if (updated && updated.data) {
+        setAgents(updated.data);
+        if (!selectedAgent) setSelectedAgent(updated.data[0]);
+      }
+      setNewAgentName(""); 
     }
   };
 
-  // 3. PROTECT AGAINST CRASH: Wait for DB to load before rendering
-  if (!selectedAgent) {
+  if (isLoading) {
     return (
       <div className="tab-content flex justify-center items-center h-64">
         <div className="text-cyan animate-pulse">Loading Agents from Database...</div>
@@ -66,12 +69,6 @@ export const IdentityManager = () => {
     );
   }
 
-  const delegationResult = AgentIdentityEngine.verifyDelegation(
-    selectedAgent.did,
-    "0x981723812938192318923819283912831293",
-    ["GPU_COMPUTE", "INFERENCE_API", "DEFI_SWAP"]
-  );
-  
   return (
     <div className="tab-content">
       <div className="section-header">
@@ -82,68 +79,62 @@ export const IdentityManager = () => {
       </div>
 
       <div className="grid-2col">
-        {/* Left Column: Agent Selector & Identity Inspector */}
+        {/* Left Column */}
         <div className="panel card-glass">
           <h3 className="panel-title"><UserCheck className="panel-icon" /> Active Agent Registry</h3>
 
-          <div className="agent-selector-list">
-            {MOCK_AGENTS.map((agent) => (
-              <div 
-                key={agent.id} 
-                className={`agent-card-item ${selectedAgent.id === agent.id ? 'active' : ''}`}
-                onClick={() => setSelectedAgent(agent)}
-              >
-                <div className="agent-card-header">
-                  <span className="agent-name">{agent.name}</span>
-                  <span className={`badge ${agent.tier.includes('Prime') ? 'badge-prime' : agent.tier.includes('High Risk') ? 'badge-danger' : 'badge-info'}`}>
-                    {agent.tier}
-                  </span>
-                </div>
-                <div className="agent-did-preview">{agent.did}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="identity-details">
-            <h4 className="subpanel-title">Delegation Credential Verification</h4>
-            
-            <div className="detail-row">
-              <span className="detail-label">Agent DID:</span>
-              <div className="code-pill">
-                <span>{selectedAgent.did}</span>
-                <button className="copy-btn" onClick={() => handleCopy(selectedAgent.did)}>
-                  {copied ? <Check className="w-4 h-4 text-emerald" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
+          {agents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-amber-500 text-center gap-3">
+              <AlertOctagon className="w-10 h-10" />
+              <p>No agents found in the database. Generate one on the right!</p>
             </div>
-
-            <div className="detail-row">
-              <span className="detail-label">Parent Entity:</span>
-              <span className="detail-value">{selectedAgent.parentOrg}</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="detail-label">ECDSA Signature:</span>
-              <span className="detail-value text-muted font-mono">0x98172381293...831293 (VERIFIED)</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="detail-label">Permitted Whitelisted Scope:</span>
-              <div className="tags-list">
-                {selectedAgent.whitelistedVendors.map((v, i) => (
-                  <span key={i} className="tag-pill">{v}</span>
+          ) : (
+            <>
+              <div className="agent-selector-list">
+                {agents.map((agent) => (
+                  <div 
+                    key={agent.id} 
+                    className={`agent-card-item ${selectedAgent?.id === agent.id ? 'active' : ''}`}
+                    onClick={() => setSelectedAgent(agent)}
+                  >
+                    <div className="agent-card-header">
+                      <span className="agent-name">{agent.name}</span>
+                      <span className={`badge ${agent.reputation >= 750 ? 'badge-prime' : agent.reputation < 550 ? 'badge-danger' : 'badge-info'}`}>
+                        Score: {agent.reputation}
+                      </span>
+                    </div>
+                    <div className="agent-did-preview">{agent.did}</div>
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <div className="verification-box success">
-              <ShieldCheck className="verif-icon" />
-              <div>
-                <strong>Identity Integrity Validated</strong>
-                <p>Verifiable W3C DID document linked to ECDSA key delegation from authorized parent wallet address.</p>
-              </div>
-            </div>
-          </div>
+              {selectedAgent && (
+                <div className="identity-details">
+                  <h4 className="subpanel-title">Delegation Credential Verification</h4>
+                  <div className="detail-row">
+                    <span className="detail-label">Agent DID:</span>
+                    <div className="code-pill">
+                      <span>{selectedAgent.did}</span>
+                      <button className="copy-btn" onClick={() => handleCopy(selectedAgent.did)}>
+                        {copied ? <Check className="w-4 h-4 text-emerald" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Parent Entity:</span>
+                    <span className="detail-value">{selectedAgent.owner}</span>
+                  </div>
+                  <div className="verification-box success">
+                    <ShieldCheck className="verif-icon" />
+                    <div>
+                      <strong>Identity Integrity Validated</strong>
+                      <p>Verifiable W3C DID document linked to ECDSA key delegation from authorized parent wallet address.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Right Column: Issue New Delegated Identity Form */}
@@ -175,37 +166,21 @@ export const IdentityManager = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label>Delegated Whitelist Restrictions</label>
-              <div className="checkbox-group">
-                <label className="checkbox-label">
-                  <input type="checkbox" defaultChecked /> GPU Compute (Modal / RunPod)
-                </label>
-                <label className="checkbox-label">
-                  <input type="checkbox" defaultChecked /> LLM Inference APIs (Together / OpenRouter)
-                </label>
-                <label className="checkbox-label">
-                  <input type="checkbox" /> DeFi Swaps (Uniswap V3)
-                </label>
-              </div>
-            </div>
-
             <button type="submit" className="btn-primary full-width">
-              Generate Cryptographic Agent DID <ChevronRight className="w-4 h-4" />
+              Generate & Register Agent DID <ChevronRight className="w-4 h-4" />
             </button>
           </form>
 
           {generatedDID && (
-            <div className="generated-result card-inner">
+            <div className="generated-result card-inner mt-4">
               <div className="result-header">
                 <Check className="text-emerald" />
-                <span>Agent Identity Successfully Delegated</span>
+                <span>Agent Identity Successfully Registered in DB</span>
               </div>
               <div className="code-block font-mono">
                 <div><strong>Agent Name:</strong> {generatedDID.name}</div>
                 <div><strong>DID:</strong> {generatedDID.did}</div>
                 <div><strong>Issuer Parent:</strong> {generatedDID.parent}</div>
-                <div><strong>Timestamp:</strong> {generatedDID.timestamp}</div>
               </div>
             </div>
           )}

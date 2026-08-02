@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CreditScoringEngine } from '../engine/CreditScoring';
-import { Zap, ShieldCheck, AlertTriangle, HelpCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Zap, ShieldCheck, CheckCircle2, XCircle, Send, RefreshCw, Bot } from 'lucide-react';
 
 export const UnderwritingEngine = () => {
   const [reputation, setReputation] = useState(815);
@@ -10,6 +10,13 @@ export const UnderwritingEngine = () => {
   const [vendorDomain, setVendorDomain] = useState("modal.com");
   const [hasEscrow, setHasEscrow] = useState(true);
 
+  // --- LYZR AI CHAT STATE ---
+  const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([
+    { role: 'ai', content: 'Greetings. I am the Lyzr Risk Oracle. Paste the loan parameters below for an instant risk analysis.' }
+  ]);
+
   const evaluation = CreditScoringEngine.evaluateLoanRequest({
     agentReputation: reputation,
     successRate: parseFloat(successRate),
@@ -18,6 +25,44 @@ export const UnderwritingEngine = () => {
     targetVendorDomain: vendorDomain,
     hasBuyerEscrowProof: hasEscrow
   });
+
+  // --- LYZR API CALL ---
+  const handleSendToLyzr = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput;
+    setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
+    setChatInput("");
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch('https://agent-prod.studio.lyzr.ai/v3/inference/chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'sk-default-fAdVn51ZIStzC6BvfSLlUl4PugnJ63Nt' // ⚠️ PASTE YOUR SK-DEF... KEY HERE!
+        },
+        body: JSON.stringify({
+          "user_id": "yashmhatre2810@gmail.com",
+          "agent_id": "6a6f2cda10d4d2ddb52d4966",
+          "session_id": `session_${Date.now()}`,
+          "message": userMsg
+        })
+      });
+
+      const data = await response.json();
+      
+      setChatHistory(prev => [...prev, { 
+        role: 'ai', 
+        content: data.response || "Analysis complete. Proceed with caution." 
+      }]);
+    } catch (err) {
+      console.error("Lyzr API Error:", err);
+      setChatHistory(prev => [...prev, { role: 'ai', content: "⚠️ API Connection Error. Please verify Lyzr network status." }]);
+    }
+    setIsChatLoading(false);
+  };
 
   return (
     <div className="tab-content">
@@ -188,6 +233,101 @@ export const UnderwritingEngine = () => {
           </div>
         </div>
       </div>
+
+      {/* LYZR AI NATIVE API INTEGRATION */}
+      <div className="panel card-glass" style={{ marginTop: '2rem', borderTop: '3px solid #a855f7', gridColumn: '1 / -1' }}>
+        <h3 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Bot className="w-6 h-6" style={{ color: '#a855f7' }} /> 
+          Lyzr Risk Oracle (Native API Integration)
+        </h3>
+        <p className="panel-desc" style={{ marginBottom: '1.5rem' }}>
+          Direct API connection to Lyzr Studio's GPT-5.5 Engine. Get an instant, institutional-grade risk analysis before deploying capital.
+        </p>
+        
+        <div style={{ 
+          background: '#030508', 
+          border: '1px solid rgba(255, 255, 255, 0.08)', 
+          borderRadius: '12px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '450px',
+          overflow: 'hidden',
+          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+        }}>
+          
+          {/* Chat History Area */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {chatHistory.map((chat, idx) => (
+              <div key={idx} style={{ 
+                display: 'flex', 
+                justifyContent: chat.role === 'user' ? 'flex-end' : 'flex-start' 
+              }}>
+                <div style={{
+                  maxWidth: '85%',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  fontSize: '13.5px',
+                  lineHeight: '1.6',
+                  fontFamily: chat.role === 'user' ? 'var(--font-main)' : 'var(--font-mono)',
+                  backgroundColor: chat.role === 'user' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.1)',
+                  border: `1px solid ${chat.role === 'user' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(168, 85, 247, 0.2)'}`,
+                  color: chat.role === 'user' ? '#e0ebf2' : '#d8b4fe',
+                  whiteSpace: 'pre-wrap',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                }}>
+                  {chat.content}
+                </div>
+              </div>
+            ))}
+            {isChatLoading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div style={{
+                  padding: '10px 16px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                  border: '1px solid rgba(168, 85, 247, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#d8b4fe',
+                  fontSize: '13px'
+                }}>
+                  <RefreshCw className="w-4 h-4 spin" /> Oracle is processing telemetry...
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input Area */}
+          <form onSubmit={handleSendToLyzr} style={{ 
+            display: 'flex', 
+            gap: '10px', 
+            padding: '12px', 
+            background: 'rgba(15, 23, 42, 0.8)', 
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)' 
+          }}>
+            <input 
+              type="text" 
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="e.g., Analyze request: $250 for Shadow-V at suspicious-api.xyz"
+              className="input-dark"
+              style={{ flex: 1, margin: 0, fontFamily: 'var(--font-main)' }}
+              disabled={isChatLoading}
+            />
+            <button 
+              type="submit" 
+              className="btn-purple"
+              disabled={isChatLoading || !chatInput.trim()}
+              style={{ margin: 0, padding: '0 20px' }}
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+
+        </div>
+      </div>
+
     </div>
   );
 };

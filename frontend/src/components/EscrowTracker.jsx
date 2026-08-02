@@ -70,9 +70,9 @@ export const EscrowTracker = () => {
 
   if (isLoading) {
     return (
-      <div className="tab-content flex justify-center items-center h-64">
-        <div className="text-cyan animate-pulse font-mono text-lg flex items-center gap-3">
-          <RefreshCw className="w-6 h-6 spin" /> Syncing Immutable Ledger from MongoDB...
+      <div className="tab-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '16rem' }}>
+        <div style={{ color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <RefreshCw style={{ width: '1.5rem', height: '1.5rem', animation: 'spin 1s linear infinite' }} /> Syncing Immutable Ledger from MongoDB...
         </div>
       </div>
     );
@@ -80,12 +80,12 @@ export const EscrowTracker = () => {
 
   if (!escrow) {
     return (
-      <div className="tab-content flex justify-center items-center h-64">
-        <div className="text-amber flex flex-col items-center gap-4">
-          <AlertOctagon className="w-10 h-10" />
+      <div className="tab-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '16rem' }}>
+        <div style={{ color: 'var(--primary-amber)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <AlertOctagon style={{ width: '2.5rem', height: '2.5rem' }} />
           <p>No active escrows found in the database. Run the Simulator first!</p>
-          <button className="btn-primary mt-2" onClick={loadRealEscrow}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Refresh Database
+          <button className="btn-primary" onClick={loadRealEscrow} style={{ marginTop: '0.5rem' }}>
+            <RefreshCw style={{ width: '1rem', height: '1rem' }} /> Refresh Database
           </button>
         </div>
       </div>
@@ -102,7 +102,7 @@ export const EscrowTracker = () => {
           <p className="subtitle">Programmatic debt recovery without legal contracts. Intercepts incoming buyer earnings to automatically deduct principal and interest before releasing profits.</p>
         </div>
         <button className="btn-secondary" onClick={loadRealEscrow}>
-          <RefreshCw className="w-4 h-4" /> Sync with DB
+          <RefreshCw style={{ width: '1rem', height: '1rem' }} /> Sync with DB
         </button>
       </div>
 
@@ -111,33 +111,113 @@ export const EscrowTracker = () => {
         <div className="panel card-glass">
           <h3 className="panel-title"><Lock className="panel-icon" /> Escrow Contract State ({state.id})</h3>
 
-          <div className="status-banner-large">
-            <span className={`status-pill-badge ${state.status.toLowerCase()}`}>{state.status}</span>
-            <span className="did-tag font-mono">{state.agentDID}</span>
+          {/* Status Banner */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            background: 'rgba(15, 23, 42, 0.7)',
+            padding: '0.85rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-color)',
+            marginBottom: '1.25rem'
+          }}>
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              padding: '0.25rem 0.65rem',
+              borderRadius: '9999px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              background: state.status.toLowerCase() === 'active'
+                ? 'rgba(56, 189, 248, 0.2)'
+                : state.status.toLowerCase() === 'repaid'
+                  ? 'rgba(16, 185, 129, 0.2)'
+                  : 'rgba(245, 158, 11, 0.2)',
+              color: state.status.toLowerCase() === 'active'
+                ? 'var(--primary-cyan)'
+                : state.status.toLowerCase() === 'repaid'
+                  ? 'var(--primary-emerald)'
+                  : 'var(--primary-amber)',
+              flexShrink: 0
+            }}>
+              {state.status}
+            </span>
+            <span style={{
+              fontSize: '0.73rem',
+              color: 'var(--text-dim)',
+              fontFamily: 'var(--font-mono)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: 0
+            }}>
+              {state.agentDID}
+            </span>
           </div>
 
-          <div className="escrow-stats-grid">
-            <div className="escrow-stat-card">
-              <span className="es-label">Locked Loan Capital</span>
-              <span className="es-value cyan-text">${state.lockedCapital} USDC</span>
+          {/* Escrow Stats Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '0.85rem',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.4)',
+              padding: '1rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Locked Loan Capital</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>${state.lockedCapital} USDC</span>
             </div>
 
-            <div className="escrow-stat-card">
-              <span className="es-label">Target Vendor Domain</span>
-              <span className="es-value emerald-text">{state.targetVendor}</span>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.4)',
+              padding: '1rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Target Vendor Domain</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-emerald)', wordBreak: 'break-all' }}>{state.targetVendor}</span>
             </div>
 
-            <div className="escrow-stat-card">
-              <span className="es-label">Protocol Debt (Principal + Interest)</span>
-              <span className="es-value font-mono">${state.totalDebt} USDC ({state.interestRatePercent}%)</span>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.4)',
+              padding: '1rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Protocol Debt (Principal + Interest)</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.totalDebt} USDC <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
             </div>
 
-            <div className="escrow-stat-card">
-              <span className="es-label">Disbursed Spend</span>
-              <span className="es-value font-mono">${state.spentCapital} USDC</span>
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.4)',
+              padding: '1rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Disbursed Spend</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.spentCapital} USDC</span>
             </div>
           </div>
 
+          {/* Repayment Interceptor */}
           <div className="repayment-interceptor-box">
             <h4 className="subpanel-title">Simulate Client Buyer Payment Inflow</h4>
             <p className="small-desc">When the client pays the agent for completed task output, funds enter the Account Abstraction wrapper.</p>
@@ -155,7 +235,7 @@ export const EscrowTracker = () => {
                 onClick={handleDeposit}
                 disabled={state.status === "REPAID"}
               >
-                Deposit & Execute Auto-Repayment Split <ArrowRight className="w-4 h-4" />
+                Deposit & Execute Auto-Repayment Split <ArrowRight style={{ width: '1rem', height: '1rem' }} />
               </button>
             </div>
           </div>
@@ -185,13 +265,17 @@ export const EscrowTracker = () => {
                         <div className="wf-badge">LENDER POOL REPAYMENT</div>
                         <div className="wf-detail">Principal: <strong>${tx.repaidPrincipal} USDC</strong></div>
                         <div className="wf-detail">Interest (Yield): <strong>${tx.repaidInterest} USDC</strong></div>
-                        <div className="wf-total text-emerald">${tx.repaidPrincipal + tx.repaidInterest} USDC</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-emerald)' }}>
+                          ${tx.repaidPrincipal + tx.repaidInterest} USDC
+                        </div>
                       </div>
 
                       <div className="wf-branch agent">
                         <div className="wf-badge">AGENT OWNER PROFIT</div>
                         <div className="wf-detail">Net Earned Revenue:</div>
-                        <div className="wf-total text-cyan">${tx.netProfitDisbursed} USDC</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-cyan)' }}>
+                          ${tx.netProfitDisbursed} USDC
+                        </div>
                       </div>
                     </div>
                   </>
@@ -205,11 +289,43 @@ export const EscrowTracker = () => {
             </div>
           )}
 
-          <div className="audit-logs-section">
-            <h4 className="subpanel-title">Smart Escrow Audit Log Execution</h4>
-            <div className="log-window font-mono">
+          {/* Hacker Console Audit Log */}
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <h4 style={{
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              marginBottom: '0.75rem',
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase'
+            }}>
+              Smart Escrow Audit Log Execution
+            </h4>
+            <div style={{
+              background: '#020304',
+              border: '1px solid rgba(16, 255, 16, 0.15)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '1rem',
+              maxHeight: '220px',
+              overflowY: 'auto',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.73rem',
+              lineHeight: 1.7,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.15rem',
+              boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 255, 16, 0.04)'
+            }}>
               {state.logs && state.logs.map((log, index) => (
-                <div key={index} className="log-line">{log}</div>
+                <div key={index} style={{
+                  color: '#39ff14',
+                  padding: '0.2rem 0',
+                  borderBottom: index < state.logs.length - 1 ? '1px solid rgba(16, 255, 16, 0.06)' : 'none',
+                  wordBreak: 'break-all'
+                }}>
+                  <span style={{ color: 'rgba(16, 255, 16, 0.4)', userSelect: 'none' }}>{'>'} </span>
+                  {log}
+                </div>
               ))}
             </div>
           </div>

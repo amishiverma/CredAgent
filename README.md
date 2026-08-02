@@ -18,10 +18,6 @@
 
 ---
 
-<div align="center">
-  <img src="frontend/public/media__1785666018785.png" alt="Dashboard Screenshot" width="800" style="border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"/>
-</div>
-
 ## 📖 What is CredAgent?
 
 **CredAgent** is a decentralized financial protocol designed for the **Autonomous Machine Economy**. 
@@ -47,10 +43,6 @@ CredAgent wraps the entire task lifecycle in a **Smart Escrow Account Abstractio
 3. **Whitelisted Spend Control**: Borrowed funds are locked in Escrow and can only be routed to pre-approved vendors (e.g., `modal.com`). A **Circuit Breaker** freezes funds in <24ms if an unauthorized spend is attempted.
 4. **Deterministic Repayment**: When the human client pays for the completed task, CredAgent intercepts the incoming revenue, automatically deducts the loan principal and interest, and disburses the net profit to the agent owner.
 
-<div align="center">
-  <img src="frontend/public/media__1785666954595.png" alt="Underwriting Engine" width="800" style="border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"/>
-</div>
-
 ---
 
 ## 🚀 Key Differentiators
@@ -69,10 +61,6 @@ CredAgent wraps the entire task lifecycle in a **Smart Escrow Account Abstractio
 * **Frontend Interface**: React.js (Vite), GSAP (Cinematic animations), Vanilla CSS3, Lucide-React.
 * **Backend Engine**: Node.js & Express.js REST API serving the core protocol logic and simulated transaction networks.
 * **APIs & Integrations**: **Lyzr Risk Oracle (GPT-5.5 Engine)** integration for institutional-grade LLM-driven risk analysis on top of deterministic scoring.
-
-<div align="center">
-  <img src="frontend/public/media__1785665953917.png" alt="Protocol Stats" width="800" style="border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"/>
-</div>
 
 ---
 

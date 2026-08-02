@@ -73,7 +73,9 @@ export const LenderPortal = () => {
 
           <div className="capital-actions-grid">
             <form onSubmit={handleDeposit} className="action-box">
-              <h4 className="subpanel-title"><ArrowDownRight className="w-4 h-4 text-emerald" /> Deposit Capital to Pool</h4>
+              <h4 className="subpanel-title" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <ArrowDownRight style={{ width: '1rem', height: '1rem', color: 'var(--primary-emerald)' }} /> Deposit Capital to Pool
+              </h4>
               <div className="input-with-btn">
                 <input 
                   type="number" 
@@ -88,7 +90,9 @@ export const LenderPortal = () => {
             </form>
 
             <form onSubmit={handleWithdraw} className="action-box">
-              <h4 className="subpanel-title"><ArrowUpRight className="w-4 h-4 text-amber" /> Withdraw Liquidity</h4>
+              <h4 className="subpanel-title" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <ArrowUpRight style={{ width: '1rem', height: '1rem', color: 'var(--primary-amber)' }} /> Withdraw Liquidity
+              </h4>
               <div className="input-with-btn">
                 <input 
                   type="number" 
@@ -109,36 +113,122 @@ export const LenderPortal = () => {
           <h3 className="panel-title"><ShieldCheck className="panel-icon" /> Whitelisted Vendor Scope Registry</h3>
           <p className="panel-desc">Agent loans are strictly constrained by Account Abstraction to spend only on these whitelisted domains.</p>
 
-          <div className="whitelist-table-container">
-            <table className="whitelist-table">
+          {/* Whitelist Table */}
+          <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'separate',
+              borderSpacing: '0',
+              fontSize: '0.85rem'
+            }}>
               <thead>
                 <tr>
-                  <th>Vendor Domain</th>
-                  <th>Category</th>
-                  <th>Trust Score</th>
-                  <th>Status</th>
+                  {['Vendor Domain', 'Category', 'Trust Score', 'Status'].map((header) => (
+                    <th key={header} style={{
+                      padding: '0.75rem 0.85rem',
+                      textAlign: 'left',
+                      borderBottom: '2px solid rgba(56, 189, 248, 0.15)',
+                      color: 'var(--text-muted)',
+                      fontWeight: 600,
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {state.whitelistedVendors.map((vendor, idx) => (
-                  <tr key={idx}>
-                    <td className="font-mono text-cyan">{vendor.domain}</td>
-                    <td>{vendor.category}</td>
-                    <td>
-                      <span className={`trust-pill ${vendor.trustScore > 90 ? 'trust-high' : 'trust-med'}`}>
+                  <tr key={idx} style={{
+                    transition: 'background 0.15s ease'
+                  }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.04)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{
+                      padding: '0.75rem 0.85rem',
+                      borderBottom: '1px solid var(--border-color)',
+                      fontFamily: 'var(--font-mono)',
+                      color: 'var(--primary-cyan)',
+                      fontWeight: 500,
+                      fontSize: '0.82rem',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '200px'
+                    }}>
+                      {vendor.domain}
+                    </td>
+                    <td style={{
+                      padding: '0.75rem 0.85rem',
+                      borderBottom: '1px solid var(--border-color)',
+                      color: 'var(--text-main)',
+                      fontSize: '0.82rem'
+                    }}>
+                      {vendor.category}
+                    </td>
+                    <td style={{
+                      padding: '0.75rem 0.85rem',
+                      borderBottom: '1px solid var(--border-color)'
+                    }}>
+                      <span style={{
+                        fontSize: '0.73rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '4px',
+                        fontFamily: 'var(--font-mono)',
+                        background: vendor.trustScore > 90
+                          ? 'rgba(16, 185, 129, 0.2)'
+                          : 'rgba(245, 158, 11, 0.2)',
+                        color: vendor.trustScore > 90
+                          ? 'var(--primary-emerald)'
+                          : 'var(--primary-amber)'
+                      }}>
                         {vendor.trustScore}/100
                       </span>
                     </td>
-                    <td><span className="badge badge-prime">Whitelisted</span></td>
+                    <td style={{
+                      padding: '0.75rem 0.85rem',
+                      borderBottom: '1px solid var(--border-color)'
+                    }}>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '9999px',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: 'var(--primary-emerald)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}>
+                        Whitelisted
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <form onSubmit={handleAddVendor} className="add-vendor-form">
-            <h4 className="subpanel-title">Add New Whitelisted API Endpoint</h4>
-            <div className="grid-3col">
+          {/* Add Vendor Form */}
+          <form onSubmit={handleAddVendor} style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <h4 style={{
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              marginBottom: '0.75rem'
+            }}>
+              Add New Whitelisted API Endpoint
+            </h4>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr auto',
+              gap: '0.75rem',
+              alignItems: 'center'
+            }}>
               <input 
                 type="text" 
                 placeholder="Domain e.g. api.modal.com" 
@@ -155,8 +245,8 @@ export const LenderPortal = () => {
                 className="input-dark"
                 required
               />
-              <button type="submit" className="btn-primary">
-                <Plus className="w-4 h-4" /> Add Endpoint
+              <button type="submit" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                <Plus style={{ width: '1rem', height: '1rem' }} /> Add Endpoint
               </button>
             </div>
           </form>
@@ -164,23 +254,115 @@ export const LenderPortal = () => {
       </div>
 
       {/* Active Protocol Loan Book */}
-      <div className="panel card-glass margin-top-lg">
+      <div className="panel card-glass" style={{ marginTop: '1.5rem' }}>
         <h3 className="panel-title"><TrendingUp className="panel-icon" /> Active Protocol Loan Book (Backed by Your Capital)</h3>
         
-        <div className="loan-book-grid">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '1rem',
+          marginTop: '1rem'
+        }}>
           {state.activeLoans.map((loan) => (
-            <div key={loan.id} className="loan-book-card">
-              <div className="lb-header">
-                <span className="lb-agent-name">{loan.agentName}</span>
-                <span className={`badge ${loan.status === 'ACTIVE' ? 'badge-info' : 'badge-prime'}`}>
+            <div key={loan.id} style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.15rem',
+              transition: 'all 0.2s ease',
+              cursor: 'default'
+            }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(56, 189, 248, 0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              {/* Card Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+                marginBottom: '0.85rem',
+                paddingBottom: '0.65rem',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
+                <span style={{
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  color: 'var(--text-main)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  minWidth: 0
+                }}>
+                  {loan.agentName}
+                </span>
+                <span style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '9999px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  flexShrink: 0,
+                  background: loan.status === 'ACTIVE'
+                    ? 'rgba(56, 189, 248, 0.15)'
+                    : 'rgba(16, 185, 129, 0.15)',
+                  color: loan.status === 'ACTIVE'
+                    ? 'var(--primary-cyan)'
+                    : 'var(--primary-emerald)'
+                }}>
                   {loan.status}
                 </span>
               </div>
-              <div className="lb-body font-mono">
-                <div>Loan Capital: <strong>${loan.loanAmount} USDC</strong></div>
-                <div>Interest APY: <strong className="text-emerald">{loan.interestRate}%</strong></div>
-                <div>Whitelisted Vendor: <span className="text-cyan">{loan.vendor}</span></div>
-                <div>Expected Payoff: ${loan.expectedPayoff} USDC</div>
+
+              {/* Card Body */}
+              <div style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.8rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.45rem',
+                color: 'var(--text-muted)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>Loan Capital:</span>
+                  <strong style={{ color: 'var(--text-main)' }}>${loan.loanAmount} USDC</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>Interest APY:</span>
+                  <strong style={{ color: 'var(--primary-emerald)' }}>{loan.interestRate}%</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>Whitelisted Vendor:</span>
+                  <span style={{
+                    color: 'var(--primary-cyan)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '120px',
+                    textAlign: 'right'
+                  }}>
+                    {loan.vendor}
+                  </span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginTop: '0.3rem',
+                  paddingTop: '0.45rem',
+                  borderTop: '1px solid var(--border-color)'
+                }}>
+                  <span>Expected Payoff:</span>
+                  <strong style={{ color: 'var(--primary-purple)' }}>${loan.expectedPayoff} USDC</strong>
+                </div>
               </div>
             </div>
           ))}

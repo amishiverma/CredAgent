@@ -26,7 +26,7 @@ export const UnderwritingEngine = () => {
     hasBuyerEscrowProof: hasEscrow
   });
 
-  // --- LYZR API CALL ---
+  // --- LYZR API CALL (SECURED WITH ENV VARIABLE) ---
   const handleSendToLyzr = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;

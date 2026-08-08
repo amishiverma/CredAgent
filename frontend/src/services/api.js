@@ -50,7 +50,10 @@ export async function evaluateUnderwriting(requestData) {
 
 export async function fetchEscrows() {
   try {
-    const res = await fetch(`${API_BASE_URL}/escrow/contracts`);
+    // cache: 'no-store' prevents 304 browser cache returning stale pre-payment data
+    const res = await fetch(`${API_BASE_URL}/escrow/contracts?_t=${Date.now()}`, {
+      cache: 'no-store'
+    });
     return await res.json();
   } catch (err) {
     console.warn('Backend offline:', err);
@@ -78,11 +81,15 @@ export async function receiveEscrowPayment(paymentData) {
     const res = await fetch(`${API_BASE_URL}/escrow/receive-payment`, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'x-api-key': 'hackathon123' // Add whatever API key your teammate set!
+        'Content-Type': 'application/json'
       },
+      cache: 'no-store',
       body: JSON.stringify(paymentData)
     });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Payment failed');
+    }
     return await res.json();
   } catch (err) {
     console.warn('Backend offline:', err);

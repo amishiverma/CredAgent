@@ -91,20 +91,28 @@ router.post('/disburse', async (req, res) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
-
 // POST receive payment (Repayment Interception)
-// POST receive payment (Repayment Interception) - BULLETPROOF VERSION
 router.post('/receive-payment', async (req, res) => {
   try {
     const { escrowId, amount } = req.body;
-    const escrow = await Escrow.findOne({ id: escrowId });
+    
+    let escrow = null;
+    if (mongoose.connection.readyState === 1) {
+      escrow = await Escrow.findOne({ id: escrowId });
+    } else {
+      escrow = sampleEscrows.find(e => e.id === escrowId); // Teammate's fallback
+    }
     
     if (!escrow) return res.status(404).json({ status: 'error', message: 'Escrow not found' });
 
     const paymentAmt = Number(amount) || 0;
     const timestamp = new Date().toLocaleTimeString();
 
-    // 🛡️ CRASH PROOF MATH: Prevents Mongoose NaN validation errors
+    // Waterfall Math
+    const principalDeduction = Math.min(paymentAmt, escrow.loanAmount || 0);
+    const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount || 0);
+    const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
+
     escrow.buyerDeposit = (Number(escrow.buyerDeposit) || 0) + paymentAmt;
     escrow.status = "REPAID";
     
@@ -115,15 +123,18 @@ router.post('/receive-payment', async (req, res) => {
     escrow.transactions.push({
       type: "REVENUE_INTERCEPTED",
       amount: paymentAmt,
+      buyerPayment: paymentAmt,
+      repaidPrincipal: principalDeduction,
+      repaidInterest: interestDeduction,
+      netProfitDisbursed: netProfit,
       description: `Buyer payment interception and automated split`,
       txHash: `0x${Math.random().toString(16).substring(2, 10)}...`
     });
 
-    await escrow.save();
-    console.log(`✅ Successfully saved repayment for ${escrowId} to MongoDB!`);
+    if (mongoose.connection.readyState === 1) await escrow.save();
+    
     res.json({ status: 'success', message: 'Repayment processed securely', data: escrow });
   } catch (error) {
-    console.error(`❌ DB Save Error:`, error.message);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });

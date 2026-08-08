@@ -6,7 +6,12 @@ const transactionSchema = new mongoose.Schema({
   description: { type: String },
   vendor: { type: String },
   txHash: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
+  timestamp: { type: Date, default: Date.now },
+  // ADDED WATERFALL FIELDS:
+  buyerPayment: { type: Number },
+  repaidPrincipal: { type: Number },
+  repaidInterest: { type: Number },
+  netProfitDisbursed: { type: Number }
 });
 
 const escrowSchema = new mongoose.Schema({

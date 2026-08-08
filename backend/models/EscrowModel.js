@@ -1,18 +1,18 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
-  type: { type: String, required: true }, 
-  amount: { type: Number, required: true },
+  type: { type: String, required: true },
+  amount: { type: Number },
   description: { type: String },
   vendor: { type: String },
   txHash: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
-  // ADDED WATERFALL FIELDS:
+  // Waterfall fields — persisted explicitly + covered by strict:false
   buyerPayment: { type: Number },
   repaidPrincipal: { type: Number },
   repaidInterest: { type: Number },
   netProfitDisbursed: { type: Number }
-});
+}, { strict: false });
 
 const escrowSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
@@ -32,6 +32,6 @@ const escrowSchema = new mongoose.Schema({
   },
   logs: [{ type: String }],
   transactions: [transactionSchema]
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 export default mongoose.model('Escrow', escrowSchema);

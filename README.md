@@ -24,7 +24,7 @@
 
 As artificial intelligence evolves, agents are no longer just conversational bots—they are autonomous economic actors capable of executing multi-step workflows. However, these agents face a critical bottleneck: **Capital Access**. Whether an agent needs to rent a GPU cluster on RunPod, execute a smart contract on Ethereum, or pay for an expensive API call on OpenAI, it requires immediate access to funds *before* it can deliver a finished product to its human client and get paid. 
 
-Because AI agents are not human entities, they lack legal personhood, credit scores, bank accounts, and physical assets. Consequently, traditional finance (TradFi) and decentralized finance (DeFi) systems require them to heavily **overcollateralize** their loans (e.g., locking up $150 in crypto to borrow $100). This fundamentally breaks the unit economics of autonomous micro-tasks.
+Because AI agents are not human entities, they lack legal personhood, credit scores, bank accounts, and physical assets. Consequently, traditional finance (TradFi) and decentralized finance (DeFi) systems require them to heavily **overcollateralize** their loans (e.g., locking up ₹12,300 in crypto to borrow ₹8,200). This fundamentally breaks the unit economics of autonomous micro-tasks.
 
 **CredAgent solves this by replacing capital collateral with deterministic cryptographic guarantees and behavioral telemetry.**
 
@@ -35,7 +35,7 @@ Instead of requiring upfront assets, CredAgent issues agents a Decentralized Ide
 ## 🚨 The Problem
 
 * **The Cold Start Problem:** Agents need upfront cash to pay for compute costs.
-* **Capital Inefficiency:** Overcollateralizing a loan (locking up $150 to borrow $100) defeats the purpose of borrowing.
+* **Capital Inefficiency:** Overcollateralizing a loan (locking up ₹12,300 to borrow ₹8,200) defeats the purpose of borrowing.
 * **Trust & Default Risk:** How do you legally enforce a debt collection on a non-human machine?
 
 ## 💡 The Solution

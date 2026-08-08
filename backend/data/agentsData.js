@@ -9,8 +9,8 @@ export const initialAgents = [
     successRate: 99.4,
     completedTasks: 1420,
     historicalDefaults: 0,
-    walletBalance: 4250,
-    collateralStaked: 1500,
+    walletBalance: 348500,
+    collateralStaked: 123000,
     createdAt: "2026-01-15T08:00:00.000Z"
   },
   {
@@ -23,8 +23,8 @@ export const initialAgents = [
     successRate: 96.8,
     completedTasks: 890,
     historicalDefaults: 0,
-    walletBalance: 1850,
-    collateralStaked: 500,
+    walletBalance: 151700,
+    collateralStaked: 41000,
     createdAt: "2026-02-10T12:30:00.000Z"
   },
   {
@@ -37,8 +37,8 @@ export const initialAgents = [
     successRate: 94.2,
     completedTasks: 310,
     historicalDefaults: 1,
-    walletBalance: 820,
-    collateralStaked: 250,
+    walletBalance: 67240,
+    collateralStaked: 20500,
     createdAt: "2026-03-01T14:15:00.000Z"
   }
 ];

@@ -1,14 +1,15 @@
 /**
  * Global Reactive Protocol State Manager
  * Tracks Lender Liquidity Pool, User Investor Balance, Active Loans, and Whitelisted Vendors.
+ * All monetary values are in ₹ INR.
  */
 
 class ProtocolStateManager {
   constructor() {
-    this.lenderPool = 50000;       // Total protocol capital available ($)
-    this.userInvestment = 5000;    // User's active deposit in the pool ($)
-    this.userYieldEarned = 182.50; // User's earned protocol interest ($)
-    this.totalBorrowed = 12500;    // Active outstanding loan capital ($)
+    this.lenderPool = 4100000;       // Total protocol capital available (₹)
+    this.userInvestment = 410000;    // User's active deposit in the pool (₹)
+    this.userYieldEarned = 14965;    // User's earned protocol interest (₹)
+    this.totalBorrowed = 1025000;    // Active outstanding loan capital (₹)
     this.whitelistedVendors = [
       { domain: "modal.com", category: "GPU Compute", trustScore: 99 },
       { domain: "runpod.io", category: "GPU Compute", trustScore: 98 },
@@ -21,24 +22,24 @@ class ProtocolStateManager {
         id: "loan_9921",
         agentName: "Nexus-7 (Compute Agent)",
         agentDID: "did:agent:0x89F3b219a10E812cD0294711AA190A521098bcAA",
-        loanAmount: 500,
+        loanAmount: 41000,
         interestRate: 4.2,
-        expectedPayoff: 650,
+        expectedPayoff: 53300,
         vendor: "modal.com",
         status: "ACTIVE",
-        disbursedAmount: 480,
+        disbursedAmount: 39360,
         createdAt: "2026-08-01 15:30"
       },
       {
         id: "loan_4412",
         agentName: "Aether-X (Arbitrage Agent)",
         agentDID: "did:agent:0x34C8971Bae771923A8712111bb910A0019C48911",
-        loanAmount: 1000,
+        loanAmount: 82000,
         interestRate: 6.5,
-        expectedPayoff: 1120,
+        expectedPayoff: 91840,
         vendor: "uniswap.v3",
         status: "ACTIVE",
-        disbursedAmount: 1000,
+        disbursedAmount: 82000,
         createdAt: "2026-08-01 15:45"
       }
     ];

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ProtocolState } from '../engine/ProtocolState';
-import { DollarSign, Wallet, ArrowDownRight, ArrowUpRight, ShieldCheck, Plus, CheckCircle2, TrendingUp } from 'lucide-react';
+import { IndianRupee, Wallet, ArrowDownRight, ArrowUpRight, ShieldCheck, Plus, CheckCircle2, TrendingUp } from 'lucide-react';
 
 export const LenderPortal = () => {
   const [state, setState] = useState(ProtocolState.getState());
-  const [depositAmount, setDepositAmount] = useState('1000');
-  const [withdrawAmount, setWithdrawAmount] = useState('500');
+  const [depositAmount, setDepositAmount] = useState('82000');
+  const [withdrawAmount, setWithdrawAmount] = useState('41000');
   const [newDomain, setNewDomain] = useState('');
   const [newCategory, setNewCategory] = useState('AI Inference');
   const [newScore, setNewScore] = useState(90);
@@ -51,12 +51,12 @@ export const LenderPortal = () => {
       <div className="grid-2col">
         {/* Left Column: Investor Capital Pool & Deposit/Withdraw */}
         <div className="panel card-glass">
-          <h3 className="panel-title"><DollarSign className="panel-icon" /> Your Lender Liquidity Position</h3>
+          <h3 className="panel-title"><IndianRupee className="panel-icon" /> Your Lender Liquidity Position</h3>
 
           <div className="investor-hero-card border-cyan">
             <div className="hero-stat">
               <span className="hero-label">Your Active Capital Deposited</span>
-              <span className="hero-val cyan-text">${state.userInvestment.toLocaleString()} INR</span>
+              <span className="hero-val cyan-text">₹{state.userInvestment.toLocaleString('en-IN')} INR</span>
             </div>
 
             <div className="hero-stat-row">
@@ -66,7 +66,7 @@ export const LenderPortal = () => {
               </div>
               <div>
                 <span className="sub-label">Your Total Interest Earned</span>
-                <span className="sub-val emerald-text font-mono">+${state.userYieldEarned.toFixed(2)} INR</span>
+                <span className="sub-val emerald-text font-mono">+₹{state.userYieldEarned.toFixed(2)} INR</span>
               </div>
             </div>
           </div>
@@ -332,7 +332,7 @@ export const LenderPortal = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
                   <span>Loan Capital:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>${loan.loanAmount} INR</strong>
+                  <strong style={{ color: 'var(--text-main)' }}>₹{loan.loanAmount.toLocaleString('en-IN')} INR</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
                   <span>Interest APY:</span>
@@ -361,7 +361,7 @@ export const LenderPortal = () => {
                   borderTop: '1px solid var(--border-color)'
                 }}>
                   <span>Expected Payoff:</span>
-                  <strong style={{ color: 'var(--primary-purple)' }}>${loan.expectedPayoff} INR</strong>
+                  <strong style={{ color: 'var(--primary-purple)' }}>₹{loan.expectedPayoff.toLocaleString('en-IN')} INR</strong>
                 </div>
               </div>
             </div>

@@ -28,35 +28,35 @@ export class CreditScoringEngine {
 
     score = Math.min(850, Math.max(300, Math.round(score)));
 
-    // 2. Determine Risk Tier & Interest Rate
+    // 2. Determine Risk Tier & Interest Rate (All limits in ₹ INR)
     let tier = "Tier F (Unacceptable Risk)";
-    let maxLimit = 100;
+    let maxLimit = 8200;
     let baseRate = 24.0;
     let approved = false;
 
     if (score >= 780) {
       tier = "Tier A+ (Prime Agent)";
-      maxLimit = 5000;
+      maxLimit = 410000;
       baseRate = 4.2;
       approved = true;
     } else if (score >= 700) {
       tier = "Tier A (Low Risk)";
-      maxLimit = 2500;
+      maxLimit = 205000;
       baseRate = 6.5;
       approved = true;
     } else if (score >= 620) {
       tier = "Tier B (Moderate Risk)";
-      maxLimit = 1000;
+      maxLimit = 82000;
       baseRate = 9.8;
       approved = true;
     } else if (score >= 550) {
       tier = "Tier C (Elevated Risk)";
-      maxLimit = 500;
+      maxLimit = 41000;
       baseRate = 14.5;
-      approved = requestedAmount <= 500;
+      approved = requestedAmount <= 41000;
     } else {
       tier = "Tier D / F (High Risk)";
-      maxLimit = 250;
+      maxLimit = 20500;
       baseRate = 22.0;
       approved = false;
     }
@@ -105,7 +105,7 @@ export class CreditScoringEngine {
     if (score >= 750) reasons.push("High historical task completion track record.");
     if (hasEscrow) reasons.push("Verifiable buyer escrow deposit detected (Zero Collateral, Guaranteed Payoff).");
     if (vendorTrust > 90) reasons.push("Target vendor is on top-tier whitelisted compute protocol.");
-    if (!approved && amount > limit) reasons.push(`Requested amount ($${amount}) exceeds approved tier limit ($${limit}).`);
+    if (!approved && amount > limit) reasons.push(`Requested amount (₹${amount.toLocaleString('en-IN')}) exceeds approved tier limit (₹${limit.toLocaleString('en-IN')}).`);
     if (vendorTrust < 30) reasons.push("Target vendor domain flagged as unverified / high anomaly risk.");
     return reasons;
   }

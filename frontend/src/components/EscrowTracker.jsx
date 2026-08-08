@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, ArrowRight, DollarSign, Lock, AlertOctagon, RefreshCw } from 'lucide-react';
-import { fetchEscrows } from '../services/api.js'; // Import your real API!
+import { ShieldCheck, ArrowRight, IndianRupee, Lock, AlertOctagon, RefreshCw } from 'lucide-react';
+import { fetchEscrows, receiveEscrowPayment } from '../services/api.js';
 
 export const EscrowTracker = () => {
   const [escrow, setEscrow] = useState(null);
@@ -29,18 +29,28 @@ export const EscrowTracker = () => {
     loadRealEscrow();
   }, []);
 
-  // 2. Local Simulation for the Demo (So you can sleep!)
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!escrow) return;
     
     const timestamp = new Date().toLocaleTimeString();
     const paymentAmt = parseFloat(paymentAmount);
     
+    // 1. Tell the MongoDB Database that the loan is repaid!
+    try {
+      await receiveEscrowPayment({
+        escrowId: escrow.id,
+        amount: paymentAmt
+      });
+    } catch (err) {
+      console.error("Failed to update database", err);
+    }
+
+    // 2. Do the math for the beautiful Waterfall UI animation
     const principalDeduction = Math.min(paymentAmt, escrow.loanAmount);
     const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount);
     const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
 
-    // Update the UI to show the waterfall animation without needing a new DB route
+    // 3. Update the UI instantly so the user sees the waterfall
     const updatedEscrow = {
       ...escrow,
       status: "REPAID",
@@ -92,7 +102,7 @@ export const EscrowTracker = () => {
     );
   }
 
-  const state = escrow; // Map DB object to UI state
+  const state = escrow;
 
   return (
     <div className="tab-content">
@@ -174,7 +184,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Locked Loan Capital</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>${state.lockedCapital} INR</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>₹{state.lockedCapital.toLocaleString('en-IN')} INR</span>
             </div>
 
             <div style={{
@@ -200,7 +210,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Protocol Debt (Principal + Interest)</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.totalDebt} INR <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{state.totalDebt.toLocaleString('en-IN')} INR <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
             </div>
 
             <div style={{
@@ -213,7 +223,7 @@ export const EscrowTracker = () => {
               gap: '0.35rem'
             }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Disbursed Spend</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>${state.spentCapital} INR</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{state.spentCapital.toLocaleString('en-IN')} INR</span>
             </div>
           </div>
 
@@ -243,7 +253,7 @@ export const EscrowTracker = () => {
 
         {/* Right Panel: Split Waterfall Visualizer */}
         <div className="panel card-glass">
-          <h3 className="panel-title"><DollarSign className="panel-icon" /> Programmatic Revenue Split Waterfall</h3>
+          <h3 className="panel-title"><IndianRupee className="panel-icon" /> Programmatic Revenue Split Waterfall</h3>
 
           {state.transactions && state.transactions.find(t => t.type === 'REVENUE_INTERCEPTED') ? (
             <div className="waterfall-container">
@@ -253,7 +263,7 @@ export const EscrowTracker = () => {
                   <>
                     <div className="waterfall-step source">
                       <div className="wf-title">Client Buyer Payout Inflow</div>
-                      <div className="wf-amount">${tx.buyerPayment} INR</div>
+                      <div className="wf-amount">₹{tx.buyerPayment.toLocaleString('en-IN')} INR</div>
                     </div>
 
                     <div className="waterfall-split-arrows">
@@ -263,10 +273,10 @@ export const EscrowTracker = () => {
                     <div className="waterfall-branches">
                       <div className="wf-branch lender">
                         <div className="wf-badge">LENDER POOL REPAYMENT</div>
-                        <div className="wf-detail">Principal: <strong>${tx.repaidPrincipal} INR</strong></div>
-                        <div className="wf-detail">Interest (Yield): <strong>${tx.repaidInterest} INR</strong></div>
+                        <div className="wf-detail">Principal: <strong>₹{tx.repaidPrincipal.toLocaleString('en-IN')} INR</strong></div>
+                        <div className="wf-detail">Interest (Yield): <strong>₹{tx.repaidInterest.toLocaleString('en-IN')} INR</strong></div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-emerald)' }}>
-                          ${tx.repaidPrincipal + tx.repaidInterest} INR
+                          ₹{(tx.repaidPrincipal + tx.repaidInterest).toLocaleString('en-IN')} INR
                         </div>
                       </div>
 
@@ -274,7 +284,7 @@ export const EscrowTracker = () => {
                         <div className="wf-badge">AGENT OWNER PROFIT</div>
                         <div className="wf-detail">Net Earned Revenue:</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-cyan)' }}>
-                          ${tx.netProfitDisbursed} INR
+                          ₹{tx.netProfitDisbursed.toLocaleString('en-IN')} INR
                         </div>
                       </div>
                     </div>

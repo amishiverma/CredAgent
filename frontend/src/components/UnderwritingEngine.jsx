@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CreditScoringEngine } from '../engine/CreditScoring';
+import { analyzeLyzrRisk } from '../services/api';
 import { Zap, ShieldCheck, CheckCircle2, XCircle, Send, RefreshCw, Bot } from 'lucide-react';
 
 export const UnderwritingEngine = () => {
@@ -26,7 +27,7 @@ export const UnderwritingEngine = () => {
     hasBuyerEscrowProof: hasEscrow
   });
 
-  // --- LYZR API CALL (SECURED WITH ENV VARIABLE) ---
+  // --- LYZR API CALL (SECURED VIA BACKEND PROXY) ---
   const handleSendToLyzr = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
@@ -37,25 +38,12 @@ export const UnderwritingEngine = () => {
     setIsChatLoading(true);
 
     try {
-      const response = await fetch('https://agent-prod.studio.lyzr.ai/v3/inference/chat/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_LYZR_API_KEY
-        },
-        body: JSON.stringify({
-          "user_id": "yashmhatre2810@gmail.com",
-          "agent_id": "6a6f2cda10d4d2ddb52d4966",
-          "session_id": `session_${Date.now()}`,
-          "message": userMsg
-        })
-      });
-
-      const data = await response.json();
+      const resData = await analyzeLyzrRisk(userMsg);
+      const content = resData?.data?.response || resData?.message || "Analysis complete. Proceed with caution.";
       
       setChatHistory(prev => [...prev, { 
         role: 'ai', 
-        content: data.response || "Analysis complete. Proceed with caution." 
+        content
       }]);
     } catch (err) {
       console.error("Lyzr API Error:", err);
@@ -203,7 +191,7 @@ export const UnderwritingEngine = () => {
           <div className="scorecard-metrics">
             <div className="metric-box">
               <span className="m-label">Approved Credit Limit</span>
-              <span className="m-val cyan-text">${evaluation.maxLimit} INR</span>
+              <span className="m-val cyan-text">₹{evaluation.maxLimit.toLocaleString('en-IN')} INR</span>
             </div>
 
             <div className="metric-box">
@@ -213,7 +201,7 @@ export const UnderwritingEngine = () => {
 
             <div className="metric-box">
               <span className="m-label">Total Debt at Maturity</span>
-              <span className="m-val font-mono">${evaluation.totalRepaymentNeeded} INR</span>
+              <span className="m-val font-mono">₹{evaluation.totalRepaymentNeeded.toLocaleString('en-IN')} INR</span>
             </div>
 
             <div className="metric-box">

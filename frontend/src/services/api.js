@@ -72,6 +72,21 @@ export async function requestEscrowLoan(loanData) {
   }
 }
 
+// NEW FUNCTION ADDED
+export async function receiveEscrowPayment(paymentData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/escrow/receive-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData)
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend offline:', err);
+    return null;
+  }
+}
+
 export async function fetchLenderPools() {
   try {
     const res = await fetch(`${API_BASE_URL}/lender/pools`);

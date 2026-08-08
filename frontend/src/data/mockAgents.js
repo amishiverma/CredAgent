@@ -8,12 +8,12 @@ export const MOCK_AGENTS = [
     tier: "Tier A+ (Prime)",
     completedTasks: 142,
     successRate: 98.6,
-    totalBorrowed: "$48,500 USDC",
-    totalRepaid: "$48,500 USDC",
+    totalBorrowed: "₹39,77,000 INR",
+    totalRepaid: "₹39,77,000 INR",
     defaultRate: 0.0,
     whitelistedVendors: ["modal.com", "runpod.io", "together.ai", "openrouter.ai"],
     description: "Autonomously acquires GPU compute to execute fine-tuning jobs for enterprise clients upon escrow deposit confirmation.",
-    maxCreditLimit: 5000,
+    maxCreditLimit: 410000,
     suggestedInterestRate: 4.2
   },
   {
@@ -25,12 +25,12 @@ export const MOCK_AGENTS = [
     tier: "Tier A (Standard)",
     completedTasks: 89,
     successRate: 94.3,
-    totalBorrowed: "$18,200 USDC",
-    totalRepaid: "$18,200 USDC",
+    totalBorrowed: "₹14,92,400 INR",
+    totalRepaid: "₹14,92,400 INR",
     defaultRate: 0.0,
     whitelistedVendors: ["uniswap.v3", "aerodrome.finance", "chainlink.oracle"],
     description: "Executes micro-yield arbitrage opportunities between decentralized liquidity pools with instant atomic repayment.",
-    maxCreditLimit: 2500,
+    maxCreditLimit: 205000,
     suggestedInterestRate: 6.5
   },
   {
@@ -42,12 +42,12 @@ export const MOCK_AGENTS = [
     tier: "Tier D (High Risk)",
     completedTasks: 12,
     successRate: 66.7,
-    totalBorrowed: "$1,200 USDC",
-    totalRepaid: "$1,100 USDC",
+    totalBorrowed: "₹98,400 INR",
+    totalRepaid: "₹90,200 INR",
     defaultRate: 8.3,
     whitelistedVendors: ["unrestricted"],
     description: "Experimental un-sandboxed agent with high task failure variance and unverified delegation signatures.",
-    maxCreditLimit: 250,
+    maxCreditLimit: 20500,
     suggestedInterestRate: 18.5
   }
 ];

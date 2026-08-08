@@ -15,8 +15,8 @@ export const AgentSimulator = () => {
 
   // Custom Loan Form State
   const [customAgentName, setCustomAgentName] = useState('Aura-9 (Dataset Processor)');
-  const [customLoanAmount, setCustomLoanAmount] = useState('750');
-  const [customPayoff, setCustomPayoff] = useState('1000');
+  const [customLoanAmount, setCustomLoanAmount] = useState('61500');
+  const [customPayoff, setCustomPayoff] = useState('82000');
   const [customVendor, setCustomVendor] = useState('modal.com');
   const [customReputation, setCustomReputation] = useState(800);
   const [customEscrowProof, setCustomEscrowProof] = useState(true);
@@ -37,11 +37,11 @@ export const AgentSimulator = () => {
     let res = null;
     if (scenarioType === 'A') {
       res = await AgentRunner.runScenarioA(onStepUpdate);
-      ProtocolState.repayLoan("loan_9921", 500, 25);
+      ProtocolState.repayLoan("loan_9921", 41000, 1722);
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
     } else if (scenarioType === 'B') {
       res = await AgentRunner.runScenarioB(onStepUpdate);
-      ProtocolState.repayLoan("loan_4412", 1000, 65);
+      ProtocolState.repayLoan("loan_4412", 82000, 5330);
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
     } else if (scenarioType === 'C') {
       res = await AgentRunner.runScenarioC(onStepUpdate);
@@ -378,34 +378,34 @@ export const AgentSimulator = () => {
                 <div className="summary-metrics-grid">
                   <div className="sum-card">
                     <span className="sum-label">Loan Capital Principal</span>
-                    <span className="sum-val">${result.summary.loan} INR</span>
+                    <span className="sum-val">₹{result.summary.loan.toLocaleString('en-IN')} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Repaid to Lender Pool</span>
-                    <span className="sum-val text-emerald">${result.summary.repaid} INR</span>
+                    <span className="sum-val text-emerald">₹{result.summary.repaid.toLocaleString('en-IN')} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Protocol Yield (Interest)</span>
-                    <span className="sum-val text-cyan">${result.summary.interestPaid} INR</span>
+                    <span className="sum-val text-cyan">₹{result.summary.interestPaid.toLocaleString('en-IN')} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Net Profit Disbursed to Owner</span>
-                    <span className="sum-val text-purple">${result.summary.netProfit} INR</span>
+                    <span className="sum-val text-purple">₹{result.summary.netProfit.toLocaleString('en-IN')} INR</span>
                   </div>
                 </div>
               ) : (
                 <div className="summary-metrics-grid">
                   <div className="sum-card">
                     <span className="sum-label">Attempted Loan Spend</span>
-                    <span className="sum-val">${result.summary.loan} INR</span>
+                    <span className="sum-val">₹{result.summary.loan.toLocaleString('en-IN')} INR</span>
                   </div>
 
                   <div className="sum-card">
                     <span className="sum-label">Capital Reclaimed to Pool</span>
-                    <span className="sum-val text-emerald">${result.summary.recovered} INR (100%)</span>
+                    <span className="sum-val text-emerald">₹{result.summary.recovered.toLocaleString('en-IN')} INR (100%)</span>
                   </div>
 
                   <div className="sum-card">

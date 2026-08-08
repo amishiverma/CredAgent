@@ -22,7 +22,7 @@ export class SmartEscrowLedger {
     this.transactions = [];
 
     this.addLog(`Smart Escrow Wallet initialized: ${this.id}`);
-    this.addLog(`Capital locked: $${loanAmount} USDC | Debt: $${this.totalDebt} USDC (Interest: ${interestRatePercent}%)`);
+    this.addLog(`Capital locked: ₹${loanAmount} INR | Debt: ₹${this.totalDebt} INR (Interest: ${interestRatePercent}%)`);
   }
 
   addLog(msg) {
@@ -57,16 +57,16 @@ export class SmartEscrowLedger {
       timestamp: new Date().toLocaleTimeString()
     });
 
-    this.addLog(`Disbursed $${amount} to whitelisted vendor '${vendorDomain}' for ${description}`);
+    this.addLog(`Disbursed ₹${amount} to whitelisted vendor '${vendorDomain}' for ${description}`);
     this.status = "ACTIVE";
     return true;
   }
 
   receiveBuyerPayment(amount) {
     if (this.status === "CIRCUIT_BREAKER_FROZEN") {
-      this.addLog(`Received $${amount} from buyer while frozen. Processing automated recovery...`);
+      this.addLog(`Received ₹${amount} from buyer while frozen. Processing automated recovery...`);
     } else {
-      this.addLog(`Buyer deposited earnings: $${amount} USDC into Escrow Contract.`);
+      this.addLog(`Buyer deposited earnings: ₹${amount} INR into Escrow Contract.`);
     }
 
     this.buyerDeposit += amount;
@@ -87,8 +87,8 @@ export class SmartEscrowLedger {
       timestamp: new Date().toLocaleTimeString()
     });
 
-    this.addLog(`⚡ REPAYMENT ENFORCED: $${principalDeduction} Principal + $${interestDeduction} Interest auto-routed to Lender Pool.`);
-    this.addLog(`🎉 NET PROFIT DISBURSED: $${netProfitToAgentOwner} USDC auto-transferred to Agent Owner.`);
+    this.addLog(`⚡ REPAYMENT ENFORCED: ₹${principalDeduction} Principal + ₹${interestDeduction} Interest auto-routed to Lender Pool.`);
+    this.addLog(`🎉 NET PROFIT DISBURSED: ₹${netProfitToAgentOwner} INR auto-transferred to Agent Owner.`);
 
     this.status = "REPAID";
     return {
@@ -104,7 +104,7 @@ export class SmartEscrowLedger {
     const remainingUnspent = this.lockedCapital - this.spentCapital;
     
     this.addLog(`🚨 CIRCUIT BREAKER TRIGGERED: ${reason}`);
-    this.addLog(`🔒 ESCROW FROZEN INSTANTLY. Reclaiming $${remainingUnspent} USDC unspent capital to Lender Pool.`);
+    this.addLog(`🔒 ESCROW FROZEN INSTANTLY. Reclaiming ₹${remainingUnspent} INR unspent capital to Lender Pool.`);
 
     this.transactions.push({
       type: "CIRCUIT_BREAKER_RECOVERY",

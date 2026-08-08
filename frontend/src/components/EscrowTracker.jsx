@@ -6,9 +6,11 @@ export const EscrowTracker = () => {
   const [escrow, setEscrow] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(650);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const loadRealEscrow = async () => {
     setIsLoading(true);
+    setIsSyncing(true);
     try {
       const response = await fetchEscrows();
       if (response && response.data && response.data.length > 0) {
@@ -20,6 +22,7 @@ export const EscrowTracker = () => {
       console.error("Error fetching escrow from DB:", error);
     }
     setIsLoading(false);
+    setIsSyncing(false);
   };
 
   useEffect(() => {
@@ -29,23 +32,29 @@ export const EscrowTracker = () => {
   const handleDeposit = async () => {
     if (!escrow) return;
     
-    const timestamp = new Date().toLocaleTimeString();
     const paymentAmt = parseFloat(paymentAmount) || 0;
     
     try {
-      await receiveEscrowPayment({
+      const response = await receiveEscrowPayment({
         escrowId: escrow.id,
         amount: paymentAmt
       });
+      // Use backend-authoritative data for 100% DB sync
+      if (response && response.data) {
+        setEscrow(response.data);
+        return;
+      }
     } catch (err) {
       console.error("Failed to update database", err);
     }
 
+    // Local fallback if backend is unreachable
+    const timestamp = new Date().toLocaleTimeString();
     const principalDeduction = Math.min(paymentAmt, escrow.loanAmount || 0);
     const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount || 0);
     const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
 
-    const updatedEscrow = {
+    setEscrow({
       ...escrow,
       status: "REPAID",
       buyerDeposit: (escrow.buyerDeposit || 0) + paymentAmt,
@@ -67,9 +76,7 @@ export const EscrowTracker = () => {
           timestamp: timestamp
         }
       ]
-    };
-
-    setEscrow(updatedEscrow);
+    });
   };
 
   if (isLoading) {
@@ -105,8 +112,8 @@ export const EscrowTracker = () => {
           <h2><ShieldCheck className="inline-icon" /> Account Abstraction Smart Escrow & Repayment Enforcer</h2>
           <p className="subtitle">Programmatic debt recovery without legal contracts. Intercepts incoming buyer earnings to automatically deduct principal and interest before releasing profits.</p>
         </div>
-        <button className="btn-secondary" onClick={loadRealEscrow}>
-          <RefreshCw style={{ width: '1rem', height: '1rem' }} /> Sync with DB
+        <button className="btn-secondary" onClick={loadRealEscrow} disabled={isSyncing}>
+          <RefreshCw style={{ width: '1rem', height: '1rem', animation: isSyncing ? 'spin 1s linear infinite' : 'none' }} /> {isSyncing ? 'Syncing...' : 'Sync with DB'}
         </button>
       </div>
 

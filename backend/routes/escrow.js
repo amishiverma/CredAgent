@@ -91,48 +91,42 @@ router.post('/disburse', async (req, res) => {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
-// POST receive payment (Repayment Interception)
+// POST receive payment (Repayment Interception) — NO auth middleware for demo stability
 router.post('/receive-payment', async (req, res) => {
   try {
     const { escrowId, amount } = req.body;
-    
-    let escrow = null;
-    if (mongoose.connection.readyState === 1) {
-      escrow = await Escrow.findOne({ id: escrowId });
-    } else {
-      escrow = sampleEscrows.find(e => e.id === escrowId); // Teammate's fallback
-    }
-    
+
+    const escrow = await Escrow.findOne({ id: escrowId });
     if (!escrow) return res.status(404).json({ status: 'error', message: 'Escrow not found' });
 
     const paymentAmt = Number(amount) || 0;
     const timestamp = new Date().toLocaleTimeString();
 
-    // Waterfall Math
+    // Waterfall Math (backend-authoritative)
     const principalDeduction = Math.min(paymentAmt, escrow.loanAmount || 0);
     const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount || 0);
     const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
 
     escrow.buyerDeposit = (Number(escrow.buyerDeposit) || 0) + paymentAmt;
-    escrow.status = "REPAID";
-    
+    escrow.status = 'REPAID';
+
     escrow.logs.push(`[${timestamp}] Buyer deposited earnings: ₹${paymentAmt} INR into Escrow Contract.`);
-    escrow.logs.push(`[${timestamp}] ⚡ REPAYMENT ENFORCED. Principal and Interest auto-routed to Lender Pool.`);
-    escrow.logs.push(`[${timestamp}] 🎉 NET PROFIT DISBURSED to Agent Owner.`);
+    escrow.logs.push(`[${timestamp}] ⚡ REPAYMENT ENFORCED: ₹${principalDeduction} Principal + ₹${interestDeduction} Interest auto-routed to Lender Pool.`);
+    escrow.logs.push(`[${timestamp}] 🎉 NET PROFIT DISBURSED: ₹${netProfit} INR auto-transferred to Agent Owner.`);
 
     escrow.transactions.push({
-      type: "REVENUE_INTERCEPTED",
+      type: 'REVENUE_INTERCEPTED',
       amount: paymentAmt,
       buyerPayment: paymentAmt,
       repaidPrincipal: principalDeduction,
       repaidInterest: interestDeduction,
       netProfitDisbursed: netProfit,
-      description: `Buyer payment interception and automated split`,
+      description: 'Buyer payment interception and automated split',
       txHash: `0x${Math.random().toString(16).substring(2, 10)}...`
     });
 
-    if (mongoose.connection.readyState === 1) await escrow.save();
-    
+    await escrow.save();
+
     res.json({ status: 'success', message: 'Repayment processed securely', data: escrow });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });

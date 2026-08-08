@@ -3,11 +3,16 @@ import Escrow from '../models/EscrowModel.js';
 
 const router = express.Router();
 
-// GET all escrows from DB
+// GET all escrows — ACTIVE first, then INITIALIZED, then others
+const STATUS_PRIORITY = { ACTIVE: 0, INITIALIZED: 1, REPAID: 2, CIRCUIT_BREAKER_FROZEN: 3 };
 router.get('/contracts', async (req, res) => {
   try {
     const escrows = await Escrow.find().sort({ createdAt: -1 });
-    res.json({ status: 'success', count: escrows.length, data: escrows });
+    // Surface ACTIVE/INITIALIZED escrows first so the demo always shows a live escrow
+    const sorted = [...escrows].sort((a, b) => 
+      (STATUS_PRIORITY[a.status] ?? 9) - (STATUS_PRIORITY[b.status] ?? 9)
+    );
+    res.json({ status: 'success', count: sorted.length, data: sorted });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }

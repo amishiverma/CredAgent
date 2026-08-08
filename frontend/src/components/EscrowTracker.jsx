@@ -14,7 +14,10 @@ export const EscrowTracker = () => {
     try {
       const response = await fetchEscrows();
       if (response && response.data && response.data.length > 0) {
-        setEscrow(response.data[0]); 
+        // Prefer ACTIVE escrow for demo, fallback to INITIALIZED, then any first
+        const active = response.data.find(e => e.status === 'ACTIVE');
+        const initialized = response.data.find(e => e.status === 'INITIALIZED');
+        setEscrow(active || initialized || response.data[0]);
       } else {
         setEscrow(null);
       }

@@ -7,13 +7,11 @@ export const EscrowTracker = () => {
   const [paymentAmount, setPaymentAmount] = useState(650);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Fetch the real Escrow data from your MongoDB!
   const loadRealEscrow = async () => {
     setIsLoading(true);
     try {
       const response = await fetchEscrows();
       if (response && response.data && response.data.length > 0) {
-        // Grab the most recent escrow from the database
         setEscrow(response.data[0]); 
       } else {
         setEscrow(null);
@@ -24,7 +22,6 @@ export const EscrowTracker = () => {
     setIsLoading(false);
   };
 
-  // Load data when the page opens
   useEffect(() => {
     loadRealEscrow();
   }, []);
@@ -33,9 +30,8 @@ export const EscrowTracker = () => {
     if (!escrow) return;
     
     const timestamp = new Date().toLocaleTimeString();
-    const paymentAmt = parseFloat(paymentAmount);
+    const paymentAmt = parseFloat(paymentAmount) || 0;
     
-    // 1. Tell the MongoDB Database that the loan is repaid!
     try {
       await receiveEscrowPayment({
         escrowId: escrow.id,
@@ -45,24 +41,22 @@ export const EscrowTracker = () => {
       console.error("Failed to update database", err);
     }
 
-    // 2. Do the math for the beautiful Waterfall UI animation
-    const principalDeduction = Math.min(paymentAmt, escrow.loanAmount);
-    const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount);
+    const principalDeduction = Math.min(paymentAmt, escrow.loanAmount || 0);
+    const interestDeduction = Math.min(paymentAmt - principalDeduction, escrow.interestAmount || 0);
     const netProfit = Math.max(0, paymentAmt - (principalDeduction + interestDeduction));
 
-    // 3. Update the UI instantly so the user sees the waterfall
     const updatedEscrow = {
       ...escrow,
       status: "REPAID",
       buyerDeposit: (escrow.buyerDeposit || 0) + paymentAmt,
       logs: [
-        ...escrow.logs,
+        ...(escrow.logs || []),
         `[${timestamp}] Buyer deposited earnings: ₹${paymentAmt} INR into Escrow Contract.`,
         `[${timestamp}] ⚡ REPAYMENT ENFORCED: ₹${principalDeduction} Principal + ₹${interestDeduction} Interest auto-routed to Lender Pool.`,
         `[${timestamp}] 🎉 NET PROFIT DISBURSED: ₹${netProfit} INR auto-transferred to Agent Owner.`
       ],
       transactions: [
-        ...escrow.transactions,
+        ...(escrow.transactions || []),
         {
           type: "REVENUE_INTERCEPTED",
           buyerPayment: paymentAmt,
@@ -102,7 +96,7 @@ export const EscrowTracker = () => {
     );
   }
 
-  const state = escrow;
+  const state = escrow; 
 
   return (
     <div className="tab-content">
@@ -121,117 +115,40 @@ export const EscrowTracker = () => {
         <div className="panel card-glass">
           <h3 className="panel-title"><Lock className="panel-icon" /> Escrow Contract State ({state.id})</h3>
 
-          {/* Status Banner */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '1rem',
-            background: 'rgba(15, 23, 42, 0.7)',
-            padding: '0.85rem 1rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-color)',
-            marginBottom: '1.25rem'
-          }}>
-            <span style={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              padding: '0.25rem 0.65rem',
-              borderRadius: '9999px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              background: state.status.toLowerCase() === 'active'
-                ? 'rgba(56, 189, 248, 0.2)'
-                : state.status.toLowerCase() === 'repaid'
-                  ? 'rgba(16, 185, 129, 0.2)'
-                  : 'rgba(245, 158, 11, 0.2)',
-              color: state.status.toLowerCase() === 'active'
-                ? 'var(--primary-cyan)'
-                : state.status.toLowerCase() === 'repaid'
-                  ? 'var(--primary-emerald)'
-                  : 'var(--primary-amber)',
-              flexShrink: 0
-            }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: 'rgba(15, 23, 42, 0.7)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.25rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, padding: '0.25rem 0.65rem', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.05em', background: state.status.toLowerCase() === 'active' ? 'rgba(56, 189, 248, 0.2)' : state.status.toLowerCase() === 'repaid' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: state.status.toLowerCase() === 'active' ? 'var(--primary-cyan)' : state.status.toLowerCase() === 'repaid' ? 'var(--primary-emerald)' : 'var(--primary-amber)', flexShrink: 0 }}>
               {state.status}
             </span>
-            <span style={{
-              fontSize: '0.73rem',
-              color: 'var(--text-dim)',
-              fontFamily: 'var(--font-mono)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              minWidth: 0
-            }}>
+            <span style={{ fontSize: '0.73rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
               {state.agentDID}
             </span>
           </div>
 
-          {/* Escrow Stats Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '0.85rem',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.4)',
-              padding: '1rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.35rem'
-            }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Locked Loan Capital</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>₹{state.lockedCapital.toLocaleString('en-IN')} INR</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-cyan)', fontFamily: 'var(--font-mono)' }}>₹{(state.lockedCapital || 0).toLocaleString('en-IN')} INR</span>
             </div>
 
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.4)',
-              padding: '1rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.35rem'
-            }}>
+            <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Target Vendor Domain</span>
               <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-emerald)', wordBreak: 'break-all' }}>{state.targetVendor}</span>
             </div>
 
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.4)',
-              padding: '1rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.35rem'
-            }}>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Protocol Debt (Principal + Interest)</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{state.totalDebt.toLocaleString('en-IN')} INR <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent}%)</span></span>
+            <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Protocol Debt</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{(state.totalDebt || 0).toLocaleString('en-IN')} INR <span style={{ color: 'var(--primary-amber)', fontSize: '0.8rem' }}>({state.interestRatePercent || 0}%)</span></span>
             </div>
 
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.4)',
-              padding: '1rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.35rem'
-            }}>
+            <div style={{ background: 'rgba(30, 41, 59, 0.4)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Disbursed Spend</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{state.spentCapital.toLocaleString('en-IN')} INR</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>₹{(state.spentCapital || 0).toLocaleString('en-IN')} INR</span>
             </div>
           </div>
 
-          {/* Repayment Interceptor */}
           <div className="repayment-interceptor-box">
             <h4 className="subpanel-title">Simulate Client Buyer Payment Inflow</h4>
             <p className="small-desc">When the client pays the agent for completed task output, funds enter the Account Abstraction wrapper.</p>
-
             <div className="payment-input-row">
               <input 
                 type="number" 
@@ -240,11 +157,7 @@ export const EscrowTracker = () => {
                 className="input-dark font-mono"
                 placeholder="Buyer Payment (₹)"
               />
-              <button 
-                className="btn-primary" 
-                onClick={handleDeposit}
-                disabled={state.status === "REPAID"}
-              >
+              <button className="btn-primary" onClick={handleDeposit} disabled={state.status === "REPAID"}>
                 Deposit & Execute Auto-Repayment Split <ArrowRight style={{ width: '1rem', height: '1rem' }} />
               </button>
             </div>
@@ -259,11 +172,17 @@ export const EscrowTracker = () => {
             <div className="waterfall-container">
               {(() => {
                 const tx = state.transactions.find(t => t.type === 'REVENUE_INTERCEPTED');
+                // CRASH-PROOF EXTRACTION: Provide fallback math if database doesn't have exact breakdown
+                const bp = tx.buyerPayment || tx.amount || 0;
+                const rp = tx.repaidPrincipal || state.loanAmount || 0;
+                const ri = tx.repaidInterest || state.interestAmount || 0;
+                const np = tx.netProfitDisbursed || Math.max(0, bp - rp - ri);
+
                 return (
                   <>
                     <div className="waterfall-step source">
                       <div className="wf-title">Client Buyer Payout Inflow</div>
-                      <div className="wf-amount">₹{tx.buyerPayment.toLocaleString('en-IN')} INR</div>
+                      <div className="wf-amount">₹{bp.toLocaleString('en-IN')} INR</div>
                     </div>
 
                     <div className="waterfall-split-arrows">
@@ -273,10 +192,10 @@ export const EscrowTracker = () => {
                     <div className="waterfall-branches">
                       <div className="wf-branch lender">
                         <div className="wf-badge">LENDER POOL REPAYMENT</div>
-                        <div className="wf-detail">Principal: <strong>₹{tx.repaidPrincipal.toLocaleString('en-IN')} INR</strong></div>
-                        <div className="wf-detail">Interest (Yield): <strong>₹{tx.repaidInterest.toLocaleString('en-IN')} INR</strong></div>
+                        <div className="wf-detail">Principal: <strong>₹{rp.toLocaleString('en-IN')} INR</strong></div>
+                        <div className="wf-detail">Interest (Yield): <strong>₹{ri.toLocaleString('en-IN')} INR</strong></div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-emerald)' }}>
-                          ₹{(tx.repaidPrincipal + tx.repaidInterest).toLocaleString('en-IN')} INR
+                          ₹{(rp + ri).toLocaleString('en-IN')} INR
                         </div>
                       </div>
 
@@ -284,7 +203,7 @@ export const EscrowTracker = () => {
                         <div className="wf-badge">AGENT OWNER PROFIT</div>
                         <div className="wf-detail">Net Earned Revenue:</div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-mono)', marginTop: '0.4rem', color: 'var(--primary-cyan)' }}>
-                          ₹{tx.netProfitDisbursed.toLocaleString('en-IN')} INR
+                          ₹{np.toLocaleString('en-IN')} INR
                         </div>
                       </div>
                     </div>
@@ -301,40 +220,13 @@ export const EscrowTracker = () => {
 
           {/* Hacker Console Audit Log */}
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-            <h4 style={{
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: 'var(--text-muted)',
-              marginBottom: '0.75rem',
-              letterSpacing: '0.02em',
-              textTransform: 'uppercase'
-            }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
               Smart Escrow Audit Log Execution
             </h4>
-            <div style={{
-              background: '#020304',
-              border: '1px solid rgba(16, 255, 16, 0.15)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '1rem',
-              maxHeight: '220px',
-              overflowY: 'auto',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.73rem',
-              lineHeight: 1.7,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.15rem',
-              boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 255, 16, 0.04)'
-            }}>
+            <div style={{ background: '#020304', border: '1px solid rgba(16, 255, 16, 0.15)', borderRadius: 'var(--radius-sm)', padding: '1rem', maxHeight: '220px', overflowY: 'auto', fontFamily: 'var(--font-mono)', fontSize: '0.73rem', lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: '0.15rem', boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 255, 16, 0.04)' }}>
               {state.logs && state.logs.map((log, index) => (
-                <div key={index} style={{
-                  color: '#39ff14',
-                  padding: '0.2rem 0',
-                  borderBottom: index < state.logs.length - 1 ? '1px solid rgba(16, 255, 16, 0.06)' : 'none',
-                  wordBreak: 'break-all'
-                }}>
-                  <span style={{ color: 'rgba(16, 255, 16, 0.4)', userSelect: 'none' }}>{'>'} </span>
-                  {log}
+                <div key={index} style={{ color: '#39ff14', padding: '0.2rem 0', borderBottom: index < state.logs.length - 1 ? '1px solid rgba(16, 255, 16, 0.06)' : 'none', wordBreak: 'break-all' }}>
+                  <span style={{ color: 'rgba(16, 255, 16, 0.4)', userSelect: 'none' }}>{'>'} </span>{log}
                 </div>
               ))}
             </div>

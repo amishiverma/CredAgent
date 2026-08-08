@@ -93,6 +93,7 @@ router.post('/disburse', async (req, res) => {
 });
 
 // POST receive payment (Repayment Interception)
+// POST receive payment (Repayment Interception) - BULLETPROOF VERSION
 router.post('/receive-payment', async (req, res) => {
   try {
     const { escrowId, amount } = req.body;
@@ -100,18 +101,17 @@ router.post('/receive-payment', async (req, res) => {
     
     if (!escrow) return res.status(404).json({ status: 'error', message: 'Escrow not found' });
 
-    const paymentAmt = Number(amount);
+    const paymentAmt = Number(amount) || 0;
     const timestamp = new Date().toLocaleTimeString();
 
-    escrow.buyerDeposit += paymentAmt;
+    // 🛡️ CRASH PROOF MATH: Prevents Mongoose NaN validation errors
+    escrow.buyerDeposit = (Number(escrow.buyerDeposit) || 0) + paymentAmt;
     escrow.status = "REPAID";
     
-    // Add logs for auditability
     escrow.logs.push(`[${timestamp}] Buyer deposited earnings: ₹${paymentAmt} INR into Escrow Contract.`);
     escrow.logs.push(`[${timestamp}] ⚡ REPAYMENT ENFORCED. Principal and Interest auto-routed to Lender Pool.`);
     escrow.logs.push(`[${timestamp}] 🎉 NET PROFIT DISBURSED to Agent Owner.`);
 
-    // Add transaction to the immutable ledger
     escrow.transactions.push({
       type: "REVENUE_INTERCEPTED",
       amount: paymentAmt,
@@ -120,8 +120,10 @@ router.post('/receive-payment', async (req, res) => {
     });
 
     await escrow.save();
+    console.log(`✅ Successfully saved repayment for ${escrowId} to MongoDB!`);
     res.json({ status: 'success', message: 'Repayment processed securely', data: escrow });
   } catch (error) {
+    console.error(`❌ DB Save Error:`, error.message);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });

@@ -77,7 +77,10 @@ export async function receiveEscrowPayment(paymentData) {
   try {
     const res = await fetch(`${API_BASE_URL}/escrow/receive-payment`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': 'hackathon123' // Add whatever API key your teammate set!
+      },
       body: JSON.stringify(paymentData)
     });
     return await res.json();

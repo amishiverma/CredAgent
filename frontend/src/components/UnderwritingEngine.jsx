@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { CreditScoringEngine } from '../engine/CreditScoring';
-import { analyzeLyzrRisk } from '../services/api';
 import { Zap, ShieldCheck, CheckCircle2, XCircle, Send, RefreshCw, Bot } from 'lucide-react';
 
 export const UnderwritingEngine = () => {
